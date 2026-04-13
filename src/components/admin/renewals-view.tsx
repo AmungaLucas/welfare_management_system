@@ -78,7 +78,7 @@ export function RenewalsView() {
           <Button size="sm" className="bg-navy-900 hover:bg-navy-800" onClick={() => setShowInitiate(true)}>
             <Plus className="h-4 w-4 mr-1" />Initiate Renewal
           </Button>
-          <DialogContent>
+          <DialogContent aria-describedby={undefined}>
             <DialogHeader><DialogTitle>Initiate Annual Renewal</DialogTitle></DialogHeader>
             <div>
               <Label className="text-xs">Year</Label>

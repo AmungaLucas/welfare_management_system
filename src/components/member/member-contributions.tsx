@@ -139,7 +139,7 @@ export function MemberContributions() {
       </Card>
 
       <Dialog open={showPayDialog} onOpenChange={setShowPayDialog}>
-        <DialogContent>
+        <DialogContent aria-describedby={undefined}>
           <DialogHeader><DialogTitle>Pay Monthly Contribution</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-3">

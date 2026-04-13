@@ -130,7 +130,7 @@ export function BereavementCases() {
               <Plus className="h-4 w-4 mr-1" />Log New Case
             </Button>
         <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
-          <DialogContent className="max-w-md">
+          <DialogContent className="max-w-md" aria-describedby={undefined}>
             <DialogHeader><DialogTitle>Log Bereavement Case</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div>
@@ -245,7 +245,7 @@ export function BereavementCases() {
 
       {/* Case Detail Dialog */}
       <Dialog open={!!selectedCase} onOpenChange={() => setSelectedCase(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg" aria-describedby={undefined}>
           <DialogHeader>
             <DialogTitle>Bereavement Case — {selectedCase?.deceasedName}</DialogTitle>
           </DialogHeader>

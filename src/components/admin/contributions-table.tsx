@@ -158,7 +158,7 @@ export function ContributionsTable() {
                 <Plus className="h-4 w-4 mr-1" />Record Payment
               </Button>
           <Dialog open={showRecordDialog} onOpenChange={setShowRecordDialog}>
-            <DialogContent>
+            <DialogContent aria-describedby={undefined}>
               <DialogHeader><DialogTitle>Record Contribution</DialogTitle></DialogHeader>
               <div className="space-y-3">
                 <div>

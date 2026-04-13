@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    console.log('[POST /api/members] Body received:', JSON.stringify(body, null, 2));
     const {
       churchMembershipNo, firstName, lastName, otherNames, phone, email, districtId,
       churchMembershipDate, isNewChurchMember, spouseName, spouseAlive,
@@ -74,9 +75,15 @@ export async function POST(req: NextRequest) {
       password,
     } = body;
 
-    // Validate required fields
-    if (!churchMembershipNo || !firstName || !lastName || !phone || !districtId) {
-      return NextResponse.json({ error: 'Required fields missing' }, { status: 400 });
+    // Validate required fields — return specific error for each missing field
+    const missing: string[] = [];
+    if (!churchMembershipNo) missing.push('Church Membership No');
+    if (!firstName) missing.push('First Name');
+    if (!lastName) missing.push('Last Name');
+    if (!phone) missing.push('Phone');
+    if (!districtId) missing.push('District');
+    if (missing.length > 0) {
+      return NextResponse.json({ error: `Missing required fields: ${missing.join(', ')}` }, { status: 400 });
     }
 
     // Ensure districtId is a valid integer
