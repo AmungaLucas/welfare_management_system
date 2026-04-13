@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession, isAdmin } from '@/lib/session';
 import prisma from '@/lib/prisma';
+import bcrypt from 'bcryptjs';
 
 export async function GET(req: NextRequest) {
   try {
@@ -71,15 +72,30 @@ export async function POST(req: NextRequest) {
       fatherName, fatherAlive, motherName, motherAlive,
       nextOfKinName, nextOfKinPhone, nextOfKinRelationship,
       status, joiningFeePaid, registrationFeePaid, dateJoinedWelfare,
+      password,
     } = body;
 
     if (!churchMembershipNo || !firstName || !lastName || !phone || !districtId) {
       return NextResponse.json({ error: 'Required fields missing' }, { status: 400 });
     }
 
+    // When setting to ACTIVE directly, a password is required for login
+    const memberStatus = status || 'PENDING_APPROVAL';
+    if (memberStatus === 'ACTIVE' && !password) {
+      return NextResponse.json({ error: 'Password is required when setting member as Active' }, { status: 400 });
+    }
+
     const existing = await prisma.member.findUnique({ where: { churchMembershipNo } });
     if (existing) {
       return NextResponse.json({ error: 'Church membership number already exists' }, { status: 409 });
+    }
+
+    // Check email uniqueness if provided
+    if (email) {
+      const existingUser = await prisma.user.findUnique({ where: { email } });
+      if (existingUser) {
+        return NextResponse.json({ error: 'Email already registered' }, { status: 409 });
+      }
     }
 
     const lastMember = await prisma.member.findFirst({ orderBy: { welfareNo: 'desc' }, select: { welfareNo: true } });
@@ -95,8 +111,20 @@ export async function POST(req: NextRequest) {
       isNew = churchDurationYears <= (settings?.newChurchMemberYears || 2);
     }
 
+    // Create a User account if status is ACTIVE (so member can log in immediately)
+    let userId: string | null = null;
+    if (memberStatus === 'ACTIVE' && password) {
+      const passwordHash = await bcrypt.hash(password, 10);
+      const userEmail = email || `${churchMembershipNo.toLowerCase().replace(/[/\s]/g, '_')}@welfare.local`;
+      const user = await prisma.user.create({
+        data: { email: userEmail, passwordHash, role: 'MEMBER', isActive: true, phone },
+      });
+      userId = user.id;
+    }
+
     const member = await prisma.member.create({
       data: {
+        userId,
         churchMembershipNo, welfareNo, firstName, lastName, otherNames: otherNames || null,
         phone, email: email || null, districtId,
         churchMembershipDate: churchMembershipDate ? new Date(churchMembershipDate) : null,
@@ -106,7 +134,7 @@ export async function POST(req: NextRequest) {
         motherName: motherName || null, motherAlive: motherAlive ?? true,
         nextOfKinName: nextOfKinName || null, nextOfKinPhone: nextOfKinPhone || null,
         nextOfKinRelationship: nextOfKinRelationship || null,
-        status: status || 'PENDING_APPROVAL',
+        status: memberStatus,
         joiningFeePaid: joiningFeePaid || 0,
         registrationFeePaid: registrationFeePaid || 0,
         dateJoinedWelfare: dateJoinedWelfare ? new Date(dateJoinedWelfare) : null,
