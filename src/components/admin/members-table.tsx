@@ -45,6 +45,7 @@ interface Member {
 interface District {
   id: number;
   name: string;
+  code: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -55,18 +56,32 @@ const statusColors: Record<string, string> = {
 };
 
 const DISTRICTS: District[] = [
-  { id: 1, name: 'BETHLEHEM' },
-  { id: 2, name: 'SAMARIA' },
-  { id: 3, name: 'NAZARETH' },
-  { id: 4, name: 'JERUSALEM' },
-  { id: 5, name: 'GALILEE' },
-  { id: 6, name: 'BETHANY' },
-  { id: 7, name: 'JUDEA' },
-  { id: 8, name: 'DIASPORA' },
-  { id: 9, name: 'UNIVERSAL' },
+  { id: 1, name: 'BETHLEHEM', code: 'BTH' },
+  { id: 2, name: 'SAMARIA', code: 'SAM' },
+  { id: 3, name: 'NAZARETH', code: 'NAZ' },
+  { id: 4, name: 'JERUSALEM', code: 'JER' },
+  { id: 5, name: 'GALILEE', code: 'GAL' },
+  { id: 6, name: 'BETHANY', code: 'BTN' },
+  { id: 7, name: 'JUDEA', code: 'JUD' },
+  { id: 8, name: 'DIASPORA', code: 'DSP' },
+  { id: 9, name: 'UNIVERSAL', code: 'UNI' },
 ];
 
+const MEMBERSHIP_PREFIX = 'ACK/UTW';
+
+function getDistrictCode(districtId: string): string {
+  const d = DISTRICTS.find((dist) => String(dist.id) === districtId);
+  return d?.code || '---';
+}
+
+function buildMembershipNo(districtId: string, memberNum: string): string {
+  const code = getDistrictCode(districtId);
+  const num = memberNum.trim().padStart(3, '0');
+  return `${MEMBERSHIP_PREFIX}/${code}/${num}`;
+}
+
 const emptyForm = {
+  memberNumber: '',
   churchMembershipNo: '',
   firstName: '',
   lastName: '',
@@ -148,9 +163,27 @@ export function MembersTable() {
     setSubmitting(false);
   };
 
+  // Compute the full membership number from district + member number
+  const fullMembershipNo = form.memberNumber.trim() && form.districtId
+    ? buildMembershipNo(form.districtId, form.memberNumber)
+    : '';
+
+  // Auto-build the full code whenever district or member number changes
+  useEffect(() => {
+    if (form.memberNumber.trim() && form.districtId) {
+      setForm((f) => ({
+        ...f,
+        churchMembershipNo: buildMembershipNo(f.districtId, f.memberNumber),
+      }));
+    } else {
+      setForm((f) => ({ ...f, churchMembershipNo: '' }));
+    }
+  }, [form.districtId, form.memberNumber]);
+
   const handleSubmit = async () => {
     // Validation
-    if (!form.churchMembershipNo.trim()) { toast.error('Church Membership No is required'); return; }
+    if (!form.memberNumber.trim()) { toast.error('Member number is required'); return; }
+    if (!form.districtId) { toast.error('District is required'); return; }
     if (!form.firstName.trim()) { toast.error('First Name is required'); return; }
     if (!form.lastName.trim()) { toast.error('Last Name is required'); return; }
     if (!form.phone.trim()) { toast.error('Phone number is required'); return; }
@@ -375,7 +408,23 @@ export function MembersTable() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label className="text-xs">Church Membership No. *</Label>
-                  <Input placeholder="ACK/UTW/BTH/006" value={form.churchMembershipNo} onChange={(e) => update('churchMembershipNo', e.target.value)} />
+                  <div className="flex gap-0 rounded-md border border-input overflow-hidden focus-within:ring-2 focus-within:ring-navy-500 focus-within:ring-offset-1">
+                    <div className="flex items-center px-3 bg-muted/60 text-xs font-mono font-medium text-navy-800 whitespace-nowrap select-all border-r border-input">
+                      {MEMBERSHIP_PREFIX}/{form.districtId ? getDistrictCode(form.districtId) : '---'}/
+                    </div>
+                    <Input
+                      placeholder="001"
+                      value={form.memberNumber}
+                      onChange={(e) => update('memberNumber', e.target.value)}
+                      className="border-0 ring-0 focus-visible:ring-0 shadow-none font-mono text-sm tracking-wider"
+                      maxLength={4}
+                    />
+                  </div>
+                  {fullMembershipNo && (
+                    <p className="text-[10px] text-muted-foreground mt-0.5">
+                      Full code: <span className="font-mono font-medium text-navy-700">{fullMembershipNo}</span>
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">District *</Label>

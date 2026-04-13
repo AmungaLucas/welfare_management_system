@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +12,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
- 
 import { ArrowLeft, Church, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -23,33 +22,45 @@ interface RegisterFormProps {
 interface District {
   id: number;
   name: string;
+  code: string;
+}
+
+const DISTRICTS: District[] = [
+  { id: 1, name: 'BETHLEHEM', code: 'BTH' },
+  { id: 2, name: 'SAMARIA', code: 'SAM' },
+  { id: 3, name: 'NAZARETH', code: 'NAZ' },
+  { id: 4, name: 'JERUSALEM', code: 'JER' },
+  { id: 5, name: 'GALILEE', code: 'GAL' },
+  { id: 6, name: 'BETHANY', code: 'BTN' },
+  { id: 7, name: 'JUDEA', code: 'JUD' },
+  { id: 8, name: 'DIASPORA', code: 'DSP' },
+  { id: 9, name: 'UNIVERSAL', code: 'UNI' },
+];
+
+const MEMBERSHIP_PREFIX = 'ACK/UTW';
+
+function getDistrictCode(districtId: string): string {
+  const d = DISTRICTS.find((dist) => String(dist.id) === districtId);
+  return d?.code || '---';
+}
+
+function buildMembershipNo(districtId: string, memberNum: string): string {
+  const code = getDistrictCode(districtId);
+  const num = memberNum.trim().padStart(3, '0');
+  return `${MEMBERSHIP_PREFIX}/${code}/${num}`;
 }
 
 export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const [loading, setLoading] = useState(false);
-  const [districts, setDistricts] = useState<District[]>([]);
-   
-  useState(() => {
-    setDistricts([
-      { id: 1, name: 'BETHLEHEM' },
-      { id: 2, name: 'SAMARIA' },
-      { id: 3, name: 'NAZARETH' },
-      { id: 4, name: 'JERUSALEM' },
-      { id: 5, name: 'GALILEE' },
-      { id: 6, name: 'BETHANY' },
-      { id: 7, name: 'JUDEA' },
-      { id: 8, name: 'DIASPORA' },
-      { id: 9, name: 'UNIVERSAL' },
-    ]);
-  });
 
   const [form, setForm] = useState({
+    memberNumber: '',
     churchMembershipNo: '',
+    districtId: '',
     firstName: '',
     lastName: '',
     phone: '',
     email: '',
-    districtId: '',
     password: '',
     confirmPassword: '',
     nextOfKinName: '',
@@ -57,28 +68,30 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
     nextOfKinRelationship: '',
   });
 
-  useState(() => {
-    fetch('/api/members?limit=1')
-      .then(() => {})
-      .catch(() => {});
-    // Static districts since no separate endpoint
-    setDistricts([
-      { id: 1, name: 'BETHLEHEM' },
-      { id: 2, name: 'SAMARIA' },
-      { id: 3, name: 'NAZARETH' },
-      { id: 4, name: 'JERUSALEM' },
-      { id: 5, name: 'GALILEE' },
-      { id: 6, name: 'BETHANY' },
-      { id: 7, name: 'JUDEA' },
-      { id: 8, name: 'DIASPORA' },
-      { id: 9, name: 'UNIVERSAL' },
-    ]);
-  });
-
   const update = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
+
+  // Auto-build full membership code when district or number changes
+  const fullCode = form.memberNumber.trim() && form.districtId
+    ? buildMembershipNo(form.districtId, form.memberNumber)
+    : '';
+
+  useEffect(() => {
+    if (form.memberNumber.trim() && form.districtId) {
+      setForm((f) => ({
+        ...f,
+        churchMembershipNo: buildMembershipNo(f.districtId, f.memberNumber),
+      }));
+    } else {
+      setForm((f) => ({ ...f, churchMembershipNo: '' }));
+    }
+  }, [form.districtId, form.memberNumber]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.memberNumber.trim() || !form.districtId) {
+      toast.error('Please select your district and enter your membership number');
+      return;
+    }
     if (form.password !== form.confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -107,7 +120,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       });
       const data: { message?: string; error?: string } = await res.json();
       if (res.ok) {
-        toast.success(data.message || 'Registration successful!');
+        toast.success(data.message || 'Registration successful! Awaiting admin approval.');
         onSwitchToLogin();
       } else {
         toast.error(data.error || 'Registration failed');
@@ -132,23 +145,42 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label className="text-xs">Church Membership No *</Label>
-              <Input placeholder="ACK/UTW/BTH/001" value={form.churchMembershipNo} onChange={(e) => update('churchMembershipNo', e.target.value)} required />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-xs">District *</Label>
-              <Select value={form.districtId} onValueChange={(v) => update('districtId', v)} required>
-                <SelectTrigger><SelectValue placeholder="Select" /></SelectTrigger>
+          {/* Membership Number — smart auto-fill */}
+          <div className="space-y-1">
+            <Label className="text-xs">Church Membership No *</Label>
+            <div className="flex gap-0 rounded-md border border-input overflow-hidden focus-within:ring-2 focus-within:ring-navy-500 focus-within:ring-offset-1">
+              <div className="flex items-center px-2.5 bg-muted/60 text-[11px] font-mono font-medium text-navy-800 whitespace-nowrap select-all border-r border-input">
+                {MEMBERSHIP_PREFIX}/
+              </div>
+              <Select value={form.districtId} onValueChange={(v) => update('districtId', v)}>
+                <SelectTrigger className="border-0 ring-0 focus-visible:ring-0 shadow-none h-9 text-[11px] font-mono font-medium text-navy-800 bg-muted/40 rounded-none min-w-[70px]">
+                  <SelectValue placeholder="---" />
+                </SelectTrigger>
                 <SelectContent>
-                  {districts.map((d) => (
-                    <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
+                  {DISTRICTS.map((d) => (
+                    <SelectItem key={d.id} value={String(d.id)}>{d.code}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
+              <div className="flex items-center px-1 bg-muted/60 text-[11px] font-mono font-medium text-navy-800 border-x border-input">
+                /
+              </div>
+              <Input
+                placeholder="001"
+                value={form.memberNumber}
+                onChange={(e) => update('memberNumber', e.target.value)}
+                className="border-0 ring-0 focus-visible:ring-0 shadow-none font-mono text-sm tracking-wider"
+                maxLength={4}
+                required
+              />
             </div>
+            {fullCode && (
+              <p className="text-[10px] text-muted-foreground mt-0.5">
+                Full: <span className="font-mono font-medium text-navy-700">{fullCode}</span>
+              </p>
+            )}
           </div>
+
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label className="text-xs">First Name *</Label>
