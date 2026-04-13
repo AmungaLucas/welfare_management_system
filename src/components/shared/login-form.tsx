@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useSignIn } from 'next-auth/react';
+import { signIn } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,8 +19,6 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
   const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { signIn } = useSignIn();
-
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
