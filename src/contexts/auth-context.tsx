@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  createContext, useContext, useCallback, useEffect, ReactNode, useSyncExternalStore,
+  createContext, useContext, useCallback, useEffect, useRef, useSyncExternalStore, ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -37,63 +37,44 @@ interface AuthContextType {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Module-level session store                                         */
-/*  (updates trigger useSyncExternalStore re-renders)                 */
+/*  External store (lives outside React component tree)                */
 /* ------------------------------------------------------------------ */
 
-let storeSession: Session | null = null;
-let storeStatus: AuthStatus = 'loading';
-const storeListeners = new Set<() => void>();
+let _session: Session | null = null;
+let _status: AuthStatus = 'loading';
+const _listeners = new Set<() => void>();
 
-function subscribeToStore(listener: () => void): () => void {
-  storeListeners.add(listener);
-  return () => { storeListeners.delete(listener); };
+function _subscribe(fn: () => void) {
+  _listeners.add(fn);
+  return () => _listeners.delete(fn);
 }
 
-/* Cached snapshot objects — mutated in-place only when store changes */
-const clientSnapshot = { session: null as Session | null, status: 'loading' as AuthStatus };
-const serverSnapshot = Object.freeze({ session: null as Session | null, status: 'loading' as AuthStatus });
+const _serverSnap = { session: null as Session | null, status: 'loading' as AuthStatus };
 
-function getStoreSnapshot() {
-  return clientSnapshot;
+function _getSnap() { return { s: _session, t: _status }; }
+function _getServerSnap() { return { s: null as Session | null, t: 'loading' as AuthStatus }; }
+
+function _emit(s: Session | null, t: AuthStatus) {
+  _session = s;
+  _status = t;
+  _listeners.forEach((fn) => fn());
 }
 
-function getServerSnapshot() {
-  return serverSnapshot;
-}
-
-function notifyStore() {
-  clientSnapshot.session = storeSession;
-  clientSnapshot.status = storeStatus;
-  storeListeners.forEach((l) => l());
-}
-
-/* ---- fetch session from /api/auth/session ------------------------- */
-async function doFetchSession() {
+async function fetchSessionFromServer(): Promise<{ session: Session | null; status: AuthStatus }> {
   try {
     const res = await fetch('/api/auth/session', { credentials: 'include' });
-    if (!res.ok) {
-      storeSession = null;
-      storeStatus = 'unauthenticated';
-    } else {
-      const data: Record<string, unknown> = await res.json();
-      if (data && typeof data === 'object' && 'user' in data && data.user) {
-        storeSession = data as unknown as Session;
-        storeStatus = 'authenticated';
-      } else {
-        storeSession = null;
-        storeStatus = 'unauthenticated';
-      }
+    if (!res.ok) return { session: null, status: 'unauthenticated' };
+    const data: Record<string, unknown> = await res.json();
+    if (data && typeof data === 'object' && 'user' in data && data.user) {
+      return { session: data as unknown as Session, status: 'authenticated' };
     }
+    return { session: null, status: 'unauthenticated' };
   } catch {
-    storeSession = null;
-    storeStatus = 'unauthenticated';
+    return { session: null, status: 'unauthenticated' };
   }
-  notifyStore();
 }
 
-/* ---- get CSRF token from NextAuth -------------------------------- */
-async function getCsrfToken(): Promise<string> {
+async function getCsrf(): Promise<string> {
   const res = await fetch('/api/auth/csrf', { credentials: 'include' });
   const data = await res.json();
   return data.csrfToken;
@@ -112,17 +93,19 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
-  /* Subscribe to the module-level store */
-  const { session, status } = useSyncExternalStore(
-    subscribeToStore,
-    getStoreSnapshot,
-    getServerSnapshot,
-  );
+  // We only use the version number to know WHEN to read from the store
+  const version = useSyncExternalStore(_subscribe, () => _listeners.size, () => 0);
 
-  /* Initial fetch + re-fetch on window focus */
+  // Suppress unused — version triggers re-render when listeners fire
+  void version;
+
+  const session = _session;
+  const status = _status;
+
+  /* ---- initial mount + re-fetch on window focus -------------------- */
   useEffect(() => {
-    doFetchSession();
-    const onFocus = () => doFetchSession();
+    fetchSessionFromServer().then(({ session: s, status: t }) => _emit(s, t));
+    const onFocus = () => fetchSessionFromServer().then(({ session: s, status: t }) => _emit(s, t));
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
   }, []);
@@ -131,15 +114,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       try {
-        const csrfToken = await getCsrfToken();
+        const csrfToken = await getCsrf();
         await fetch('/api/auth/callback/credentials', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           credentials: 'include',
           body: new URLSearchParams({ email, password, csrfToken }),
         });
-        await doFetchSession();
-        return { ok: storeStatus === 'authenticated', error: storeStatus !== 'authenticated' ? 'Invalid email or password' : undefined };
+        const { session: s, status: t } = await fetchSessionFromServer();
+        _emit(s, t);
+        return { ok: t === 'authenticated', error: t !== 'authenticated' ? 'Invalid email or password' : undefined };
       } catch {
         return { ok: false, error: 'Network error – please try again' };
       }
@@ -151,15 +135,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginMember = useCallback(
     async (churchMembershipNo: string, phone: string) => {
       try {
-        const csrfToken = await getCsrfToken();
+        const csrfToken = await getCsrf();
         await fetch('/api/auth/callback/credentials', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           credentials: 'include',
           body: new URLSearchParams({ churchMembershipNo, phone, csrfToken }),
         });
-        await doFetchSession();
-        return { ok: storeStatus === 'authenticated', error: storeStatus !== 'authenticated' ? 'Invalid membership number or phone' : undefined };
+        const { session: s, status: t } = await fetchSessionFromServer();
+        _emit(s, t);
+        return { ok: t === 'authenticated', error: t !== 'authenticated' ? 'Invalid membership number or phone' : undefined };
       } catch {
         return { ok: false, error: 'Network error – please try again' };
       }
@@ -170,7 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /* ---- logout ----------------------------------------------------- */
   const logout = useCallback(async () => {
     try {
-      const csrfToken = await getCsrfToken();
+      const csrfToken = await getCsrf();
       await fetch('/api/auth/signout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -178,18 +163,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: new URLSearchParams({ csrfToken }),
       });
     } catch {
-      // ignore – we clear state anyway
+      // ignore
     }
-    storeSession = null;
-    storeStatus = 'unauthenticated';
-    notifyStore();
+    _emit(null, 'unauthenticated');
     router.refresh();
   }, [router]);
 
   /* ---- render ----------------------------------------------------- */
   return (
     <AuthContext.Provider
-      value={{ session, status, login, loginMember, logout, refresh: doFetchSession }}
+      value={{ session, status, login, loginMember, logout, refresh: () => fetchSessionFromServer().then(({ session: s, status: t }) => _emit(s, t)) }}
     >
       {children}
     </AuthContext.Provider>
