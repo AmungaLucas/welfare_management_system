@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
-import { PrismaClient } from '@/generated/prisma/client';
+import { PrismaClient } from '@prisma/client';
 
 /**
  * Force-read DATABASE_URL from the .env file to avoid
@@ -14,7 +14,6 @@ function loadDbUrlFromDotEnv(): string {
       const trimmed = line.trim();
       if (trimmed.startsWith('DATABASE_URL=')) {
         let val = trimmed.substring('DATABASE_URL='.length).trim();
-        // Strip surrounding quotes
         if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
         if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
         return val;
