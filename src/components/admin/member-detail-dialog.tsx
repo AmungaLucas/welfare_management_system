@@ -247,20 +247,20 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
                 </Badge>
               </div>
 
-              {/* Stats Row */}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/50">
+              {/* Stats */}
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-2.5">
                   <Wallet className="h-4 w-4 text-teal-600 shrink-0" />
-                  <div className="min-w-0">
+                  <div>
                     <p className="text-[10px] text-muted-foreground">Wallet</p>
-                    <p className="text-sm font-bold truncate">{formatCurrency(Number(member.walletBalance))}</p>
+                    <p className="text-sm font-bold">{formatCurrency(Number(member.walletBalance))}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/50">
+                <div className="flex items-center gap-2.5">
                   <Receipt className="h-4 w-4 text-blue-600 shrink-0" />
-                  <div className="min-w-0">
+                  <div className="text-right">
                     <p className="text-[10px] text-muted-foreground">Total Paid</p>
-                    <p className="text-sm font-bold truncate">{formatCurrency(totalPaid)}</p>
+                    <p className="text-sm font-bold">{formatCurrency(totalPaid)}</p>
                   </div>
                 </div>
               </div>
