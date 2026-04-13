@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, Plus, Eye, CheckCircle, XCircle, Users, DollarSign } from 'lucide-react';
+import { Heart, Plus, Eye, CheckCircle, XCircle, Users, DollarSign, Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CaseDetail {
@@ -48,6 +48,15 @@ interface BereavementCase {
   pendingContributions?: number;
 }
 
+interface MemberOption {
+  id: string;
+  firstName: string;
+  lastName: string;
+  churchMembershipNo: string;
+  welfareNo: number | null;
+  status: string;
+}
+
 export function BereavementCases() {
   const [cases, setCases] = useState<BereavementCase[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,14 +64,22 @@ export function BereavementCases() {
   const [selectedCase, setSelectedCase] = useState<BereavementCase | null>(null);
   const [form, setForm] = useState({
     memberId: '',
+    memberLabel: '',
     deceasedName: '',
     deceasedRelationship: 'SPOUSE',
-    deceasedAge: '',
     dateOfDeath: '',
     dateOfBurial: '',
     burialLocation: '',
     category: 'NUCLEAR_FAMILY',
   });
+
+  // Member search state
+  const [memberQuery, setMemberQuery] = useState('');
+  const [memberResults, setMemberResults] = useState<MemberOption[]>([]);
+  const [memberSearching, setMemberSearching] = useState(false);
+  const [showMemberDropdown, setShowMemberDropdown] = useState(false);
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   const fetchCases = async () => {
     setLoading(true);
@@ -76,6 +93,57 @@ export function BereavementCases() {
 
   useEffect(() => { fetchCases(); }, []);
 
+  // Search members with debounce
+  const searchMembers = useCallback(async (query: string) => {
+    if (query.trim().length < 1) {
+      setMemberResults([]);
+      setShowMemberDropdown(false);
+      return;
+    }
+    setMemberSearching(true);
+    try {
+      const res = await fetch(`/api/members?search=${encodeURIComponent(query)}&limit=10&status=ACTIVE`);
+      const data = await res.json();
+      setMemberResults(data.members || []);
+      setShowMemberDropdown(true);
+    } catch {
+      setMemberResults([]);
+    } finally {
+      setMemberSearching(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    searchTimeoutRef.current = setTimeout(() => {
+      searchMembers(memberQuery);
+    }, 300);
+    return () => { if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current); };
+  }, [memberQuery, searchMembers]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowMemberDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectMember = (member: MemberOption) => {
+    const label = `${member.firstName} ${member.lastName} — ${member.churchMembershipNo}${member.welfareNo ? ` (#${member.welfareNo})` : ''}`;
+    setForm((f) => ({ ...f, memberId: member.id, memberLabel: label }));
+    setMemberQuery('');
+    setShowMemberDropdown(false);
+  };
+
+  const clearMember = () => {
+    setForm((f) => ({ ...f, memberId: '', memberLabel: '' }));
+    setMemberResults([]);
+  };
+
   const fetchCaseDetail = async (id: string) => {
     const res = await fetch(`/api/bereavement/${id}`);
     const data = await res.json();
@@ -83,20 +151,28 @@ export function BereavementCases() {
   };
 
   const handleCreate = async () => {
-    if (!form.memberId || !form.deceasedName) { toast.error('Required fields missing'); return; }
+    if (!form.memberId || !form.deceasedName) { toast.error('Please select an affected member and enter the deceased name'); return; }
     try {
       const res = await fetch('/api/bereavement', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...form,
           memberId: form.memberId,
-          deceasedAge: form.deceasedAge ? parseInt(form.deceasedAge) : null,
+          deceasedName: form.deceasedName,
+          deceasedRelationship: form.deceasedRelationship,
+          dateOfDeath: form.dateOfDeath || null,
+          dateOfBurial: form.dateOfBurial || null,
+          burialLocation: form.burialLocation || null,
+          category: form.category,
         }),
       });
       if (res.ok) {
         toast.success('Case created successfully');
         setShowNewDialog(false);
+        setForm({
+          memberId: '', memberLabel: '', deceasedName: '', deceasedRelationship: 'SPOUSE',
+          dateOfDeath: '', dateOfBurial: '', burialLocation: '', category: 'NUCLEAR_FAMILY',
+        });
         fetchCases();
       } else {
         const d = await res.json();
@@ -129,14 +205,71 @@ export function BereavementCases() {
         <Button size="sm" className="bg-red-700 hover:bg-red-800 text-white" onClick={() => setShowNewDialog(true)}>
               <Plus className="h-4 w-4 mr-1" />Log New Case
             </Button>
-        <Dialog open={showNewDialog} onOpenChange={setShowNewDialog}>
+        <Dialog open={showNewDialog} onOpenChange={(open) => { if (!open) clearMember(); setShowNewDialog(open); }}>
           <DialogContent className="max-w-md" aria-describedby={undefined}>
             <DialogHeader><DialogTitle>Log Bereavement Case</DialogTitle></DialogHeader>
             <div className="space-y-3">
-              <div>
-                <Label className="text-xs">Affected Member ID</Label>
-                <Input placeholder="Member ID" value={form.memberId}
-                  onChange={(e) => setForm({ ...form, memberId: e.target.value })} />
+              {/* Searchable Member Dropdown */}
+              <div className="space-y-1">
+                <Label className="text-xs">Affected Member *</Label>
+                {form.memberId ? (
+                  <div className="flex items-center gap-2 h-9 px-3 rounded-md border border-input bg-muted/50">
+                    <span className="text-sm flex-1 truncate">{form.memberLabel}</span>
+                    <button
+                      type="button"
+                      onClick={clearMember}
+                      className="text-muted-foreground hover:text-foreground text-xs shrink-0"
+                    >
+                      ✕ Change
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative" ref={dropdownRef}>
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                      <Input
+                        placeholder="Search by name or membership no..."
+                        value={memberQuery}
+                        onChange={(e) => setMemberQuery(e.target.value)}
+                        className="pl-8 pr-8"
+                      />
+                      {memberSearching && (
+                        <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 animate-spin text-muted-foreground" />
+                      )}
+                    </div>
+                    {showMemberDropdown && memberResults.length > 0 && (
+                      <div className="absolute z-50 top-full mt-1 w-full bg-white border border-input rounded-md shadow-lg max-h-48 overflow-y-auto">
+                        {memberResults.map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            className="w-full px-3 py-2 text-left text-sm hover:bg-muted/80 border-b border-border last:border-0 transition-colors"
+                            onClick={() => selectMember(m)}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium">{m.firstName} {m.lastName}</span>
+                              <span className="text-[10px] text-muted-foreground font-mono ml-2 shrink-0">
+                                #{m.welfareNo || '—'}
+                              </span>
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                              {m.churchMembershipNo} • {m.status === 'ACTIVE' ? (
+                                <span className="text-emerald-600">Active</span>
+                              ) : (
+                                <span className="text-amber-600">{m.status.replace(/_/g, ' ')}</span>
+                              )}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    {showMemberDropdown && memberQuery.trim().length >= 1 && !memberSearching && memberResults.length === 0 && (
+                      <div className="absolute z-50 top-full mt-1 w-full bg-white border border-input rounded-md shadow-lg p-3 text-sm text-muted-foreground text-center">
+                        No members found
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div>
                 <Label className="text-xs">Deceased Name *</Label>
@@ -146,7 +279,7 @@ export function BereavementCases() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs">Relationship *</Label>
-                  <Select value={form.deceasedRelationship || ''} onValueChange={(v) => setForm({ ...form, deceasedRelationship: v as 'MEMBER' | 'SPOUSE' | 'CHILD' | 'PARENT' | 'SPOUSE_PARENT' })}>
+                  <Select value={form.deceasedRelationship || ''} onValueChange={(v) => setForm({ ...form, deceasedRelationship: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="MEMBER">Member</SelectItem>
@@ -159,7 +292,7 @@ export function BereavementCases() {
                 </div>
                 <div>
                   <Label className="text-xs">Category</Label>
-                  <Select value={form.category || ''} onValueChange={(v) => setForm({ ...form, category: v as 'NUCLEAR_FAMILY' | 'PARENT' })}>
+                  <Select value={form.category || ''} onValueChange={(v) => setForm({ ...form, category: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="NUCLEAR_FAMILY">Nuclear Family (Ksh 100k)</SelectItem>
@@ -170,11 +303,6 @@ export function BereavementCases() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs">Age</Label>
-                  <Input type="number" value={form.deceasedAge}
-                    onChange={(e) => setForm({ ...form, deceasedAge: e.target.value })} />
-                </div>
-                <div>
                   <Label className="text-xs">Burial Location</Label>
                   <Input value={form.burialLocation}
                     onChange={(e) => setForm({ ...form, burialLocation: e.target.value })} />
@@ -182,7 +310,7 @@ export function BereavementCases() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowNewDialog(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => { clearMember(); setShowNewDialog(false); }}>Cancel</Button>
               <Button className="bg-red-700 hover:bg-red-800" onClick={handleCreate}>Create Case</Button>
             </DialogFooter>
           </DialogContent>
