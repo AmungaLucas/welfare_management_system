@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Heart, CheckCircle, DollarSign } from 'lucide-react';
+import { Heart, CheckCircle, DollarSign, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CaseContribution {
@@ -21,6 +21,8 @@ interface CaseContribution {
     deceasedRelationship: string;
     status: string;
     contributionPerMember: number;
+    createdAt: string;
+    dateOfBurial: string | null;
   };
 }
 
@@ -110,6 +112,10 @@ export function MemberCases() {
                       <p className="text-muted-foreground">
                         Paid: <span className="font-medium">{Number(c.paidAmount) > 0 ? `Ksh ${Number(c.paidAmount).toLocaleString()}` : '—'}</span>
                       </p>
+                      <div className="flex items-center gap-3 mt-1 text-[10px] text-muted-foreground">
+                        <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{c.case?.createdAt ? new Date(c.case.createdAt).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</span>
+                        {c.case?.dateOfBurial && <span>Burial: {new Date(c.case.dateOfBurial).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' })}</span>}
+                      </div>
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">

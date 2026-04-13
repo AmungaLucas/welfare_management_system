@@ -40,3 +40,24 @@ Stage Summary:
 - Database seeded with admin user (admin@welfare.com / admin123) and sample data
 - Files changed: `prisma/schema.prisma`, `.env`, `src/lib/prisma.ts`
 - Verified: login, session, members API all work against MySQL
+
+---
+Task ID: 3
+Agent: Main Agent
+Task: Double-click prevention, date fields on bereavement cases, dashboard restructure
+
+Work Log:
+- Verified Task 1 (double-click prevention) was already implemented: `submitting` state, `if (submitting) return;` guard, `disabled={submitting}` on Create Case button, spinner shown during submission
+- Verified Task 3 (dashboard restructure) was already implemented: Admin `PaymentsView` with 5 tabs (Contributions, Renewals, Joining Fees, Registration, Cases), Member `MemberPayments` with 3 tabs (Monthly Contributions, Annual Renewals, Cases), sidebar shows "Payments" with CreditCard icon
+- Added `createdAt` field to `BereavementCase` interface in `bereavement-cases.tsx`
+- Added date display (date created + date of burial) to admin case cards with Calendar icon
+- Enhanced case detail dialog to show all date fields: Date Created, Date of Burial, Date of Death, Burial Location
+- Updated `CaseContribution` interface in `member-cases.tsx` to include `createdAt` and `dateOfBurial`
+- Added date display to member case cards with Calendar icon
+- Imported `Calendar` icon from lucide-react in both components
+- All lint checks pass cleanly
+
+Stage Summary:
+- 3 tasks confirmed/implemented: double-click prevention (already done), date fields (added), dashboard restructure (already done)
+- Dates now displayed on both admin and member case views
+- Files changed: `src/components/admin/bereavement-cases.tsx`, `src/components/member/member-cases.tsx`

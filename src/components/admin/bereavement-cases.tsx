@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, Plus, Eye, CheckCircle, XCircle, Users, DollarSign, Search, Loader2 } from 'lucide-react';
+import { Heart, Plus, Eye, CheckCircle, XCircle, Users, DollarSign, Search, Loader2, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CaseDetail {
@@ -42,7 +42,7 @@ interface BereavementCase {
   status: string;
   memberEligible: boolean;
   eligibilityNotes: string | null;
-  loggedAt: string;
+  createdAt: string;
   member: { firstName: string; lastName: string; churchMembershipNo: string; district: { name: string } };
   paidContributions?: number;
   pendingContributions?: number;
@@ -365,6 +365,10 @@ export function BereavementCases() {
                     <p className="text-[10px] text-muted-foreground mt-1">
                       {c.category === 'NUCLEAR_FAMILY' ? 'Nuclear Family' : 'Parent'} • Ksh {Number(c.contributionPerMember).toLocaleString()}/member
                     </p>
+                    <div className="flex items-center gap-3 mt-1.5 text-[10px] text-muted-foreground">
+                      <span className="flex items-center gap-1"><Calendar className="h-3 w-3" />{c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</span>
+                      {c.dateOfBurial && <span>Burial: {new Date(c.dateOfBurial).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' })}</span>}
+                    </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
                     <Badge className={
@@ -406,6 +410,10 @@ export function BereavementCases() {
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><span className="text-muted-foreground">Member:</span><br />{selectedCase.member?.firstName} {selectedCase.member?.lastName}</div>
                 <div><span className="text-muted-foreground">Relationship:</span><br />{selectedCase.deceasedRelationship}</div>
+                <div><span className="text-muted-foreground">Date Created:</span><br />{selectedCase.createdAt ? new Date(selectedCase.createdAt).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}</div>
+                <div><span className="text-muted-foreground">Date of Burial:</span><br />{selectedCase.dateOfBurial ? new Date(selectedCase.dateOfBurial).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not set'}</div>
+                <div><span className="text-muted-foreground">Date of Death:</span><br />{selectedCase.dateOfDeath ? new Date(selectedCase.dateOfDeath).toLocaleDateString('en-KE', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not set'}</div>
+                <div><span className="text-muted-foreground">Burial Location:</span><br />{selectedCase.burialLocation || 'Not set'}</div>
                 <div><span className="text-muted-foreground">Benefit:</span><br />Ksh {Number(selectedCase.benefitAmount).toLocaleString()}</div>
                 <div><span className="text-muted-foreground">Benefit Status:</span><br /><Badge>{selectedCase.benefitStatus}</Badge></div>
               </div>
