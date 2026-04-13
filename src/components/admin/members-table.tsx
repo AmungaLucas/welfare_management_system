@@ -45,7 +45,6 @@ interface Member {
 interface District {
   id: number;
   name: string;
-  code: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -55,27 +54,21 @@ const statusColors: Record<string, string> = {
   REMOVED: 'bg-gray-100 text-gray-800',
 };
 
-const DISTRICTS: District[] = [
-  { id: 1, name: 'BETHLEHEM', code: 'BTH' },
-  { id: 2, name: 'SAMARIA', code: 'SAM' },
-  { id: 3, name: 'NAZARETH', code: 'NAZ' },
-  { id: 4, name: 'JERUSALEM', code: 'JER' },
-  { id: 5, name: 'GALILEE', code: 'GAL' },
-  { id: 6, name: 'BETHANY', code: 'BTN' },
-  { id: 7, name: 'JUDEA', code: 'JUD' },
-  { id: 8, name: 'DIASPORA', code: 'DSP' },
-  { id: 9, name: 'UNIVERSAL', code: 'UNI' },
-];
-
 const MEMBERSHIP_PREFIX = 'ACK/UTW';
 
-function getDistrictCode(districtId: string): string {
-  const d = DISTRICTS.find((dist) => String(dist.id) === districtId);
-  return d?.code || '---';
+// District name → 3-letter code mapping for membership numbers
+const DISTRICT_CODES: Record<string, string> = {
+  BETHLEHEM: 'BTH', SAMARIA: 'SAM', NAZARETH: 'NAZ', JERUSALEM: 'JER',
+  GALILEE: 'GAL', BETHANY: 'BTN', JUDEA: 'JUD', DIASPORA: 'DSP', UNIVERSAL: 'UNI',
+};
+
+function getDistrictCode(districtId: string, districts: District[]): string {
+  const d = districts.find((dist) => String(dist.id) === districtId);
+  return d ? (DISTRICT_CODES[d.name] || '---') : '---';
 }
 
-function buildMembershipNo(districtId: string, memberNum: string): string {
-  const code = getDistrictCode(districtId);
+function buildMembershipNo(districtId: string, memberNum: string, districts: District[]): string {
+  const code = getDistrictCode(districtId, districts);
   const num = memberNum.trim().padStart(3, '0');
   return `${MEMBERSHIP_PREFIX}/${code}/${num}`;
 }
@@ -108,6 +101,7 @@ const emptyForm = {
 
 export function MembersTable() {
   const [members, setMembers] = useState<Member[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -117,6 +111,14 @@ export function MembersTable() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(emptyForm);
+
+  // Fetch districts from the database (not hardcoded)
+  useEffect(() => {
+    fetch('/api/districts')
+      .then((r) => r.json())
+      .then((data) => { if (data.districts) setDistricts(data.districts); })
+      .catch(() => toast.error('Failed to load districts'));
+  }, []);
 
   const fetchMembers = useCallback(async () => {
     setLoading(true);
@@ -165,20 +167,20 @@ export function MembersTable() {
 
   // Compute the full membership number from district + member number
   const fullMembershipNo = form.memberNumber.trim() && form.districtId
-    ? buildMembershipNo(form.districtId, form.memberNumber)
+    ? buildMembershipNo(form.districtId, form.memberNumber, districts)
     : '';
 
   // Auto-build the full code whenever district or member number changes
   useEffect(() => {
-    if (form.memberNumber.trim() && form.districtId) {
+    if (form.memberNumber.trim() && form.districtId && districts.length > 0) {
       setForm((f) => ({
         ...f,
-        churchMembershipNo: buildMembershipNo(f.districtId, f.memberNumber),
+        churchMembershipNo: buildMembershipNo(f.districtId, f.memberNumber, districts),
       }));
     } else {
       setForm((f) => ({ ...f, churchMembershipNo: '' }));
     }
-  }, [form.districtId, form.memberNumber]);
+  }, [form.districtId, form.memberNumber, districts]);
 
   const handleSubmit = async () => {
     // Validation
@@ -410,7 +412,7 @@ export function MembersTable() {
                   <Label className="text-xs">Church Membership No. *</Label>
                   <div className="flex gap-0 rounded-md border border-input overflow-hidden focus-within:ring-2 focus-within:ring-navy-500 focus-within:ring-offset-1">
                     <div className="flex items-center px-3 bg-muted/60 text-xs font-mono font-medium text-navy-800 whitespace-nowrap select-all border-r border-input">
-                      {MEMBERSHIP_PREFIX}/{form.districtId ? getDistrictCode(form.districtId) : '---'}/
+                      {MEMBERSHIP_PREFIX}/{form.districtId ? getDistrictCode(form.districtId, districts) : '---'}/
                     </div>
                     <Input
                       placeholder="001"
@@ -431,9 +433,11 @@ export function MembersTable() {
                   <Select value={form.districtId} onValueChange={(v) => update('districtId', v)}>
                     <SelectTrigger><SelectValue placeholder="Select district" /></SelectTrigger>
                     <SelectContent>
-                      {DISTRICTS.map((d) => (
+                      {districts.length > 0 ? districts.map((d) => (
                         <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>
-                      ))}
+                      )) : (
+                        <SelectItem value="" disabled>Loading districts...</SelectItem>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>

@@ -22,36 +22,29 @@ interface RegisterFormProps {
 interface District {
   id: number;
   name: string;
-  code: string;
 }
 
-const DISTRICTS: District[] = [
-  { id: 1, name: 'BETHLEHEM', code: 'BTH' },
-  { id: 2, name: 'SAMARIA', code: 'SAM' },
-  { id: 3, name: 'NAZARETH', code: 'NAZ' },
-  { id: 4, name: 'JERUSALEM', code: 'JER' },
-  { id: 5, name: 'GALILEE', code: 'GAL' },
-  { id: 6, name: 'BETHANY', code: 'BTN' },
-  { id: 7, name: 'JUDEA', code: 'JUD' },
-  { id: 8, name: 'DIASPORA', code: 'DSP' },
-  { id: 9, name: 'UNIVERSAL', code: 'UNI' },
-];
+const DISTRICT_CODES: Record<string, string> = {
+  BETHLEHEM: 'BTH', SAMARIA: 'SAM', NAZARETH: 'NAZ', JERUSALEM: 'JER',
+  GALILEE: 'GAL', BETHANY: 'BTN', JUDEA: 'JUD', DIASPORA: 'DSP', UNIVERSAL: 'UNI',
+};
 
 const MEMBERSHIP_PREFIX = 'ACK/UTW';
 
-function getDistrictCode(districtId: string): string {
-  const d = DISTRICTS.find((dist) => String(dist.id) === districtId);
-  return d?.code || '---';
+function getDistrictCode(districtId: string, districts: District[]): string {
+  const d = districts.find((dist) => String(dist.id) === districtId);
+  return d ? (DISTRICT_CODES[d.name] || '---') : '---';
 }
 
-function buildMembershipNo(districtId: string, memberNum: string): string {
-  const code = getDistrictCode(districtId);
+function buildMembershipNo(districtId: string, memberNum: string, districts: District[]): string {
+  const code = getDistrictCode(districtId, districts);
   const num = memberNum.trim().padStart(3, '0');
   return `${MEMBERSHIP_PREFIX}/${code}/${num}`;
 }
 
 export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
   const [loading, setLoading] = useState(false);
+  const [districts, setDistricts] = useState<District[]>([]);
 
   const [form, setForm] = useState({
     memberNumber: '',
@@ -70,21 +63,29 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
   const update = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
+  // Fetch districts from the database
+  useEffect(() => {
+    fetch('/api/districts')
+      .then((r) => r.json())
+      .then((data) => { if (data.districts) setDistricts(data.districts); })
+      .catch(() => {});
+  }, []);
+
   // Auto-build full membership code when district or number changes
-  const fullCode = form.memberNumber.trim() && form.districtId
-    ? buildMembershipNo(form.districtId, form.memberNumber)
+  const fullCode = form.memberNumber.trim() && form.districtId && districts.length > 0
+    ? buildMembershipNo(form.districtId, form.memberNumber, districts)
     : '';
 
   useEffect(() => {
-    if (form.memberNumber.trim() && form.districtId) {
+    if (form.memberNumber.trim() && form.districtId && districts.length > 0) {
       setForm((f) => ({
         ...f,
-        churchMembershipNo: buildMembershipNo(f.districtId, f.memberNumber),
+        churchMembershipNo: buildMembershipNo(f.districtId, f.memberNumber, districts),
       }));
     } else {
       setForm((f) => ({ ...f, churchMembershipNo: '' }));
     }
-  }, [form.districtId, form.memberNumber]);
+  }, [form.districtId, form.memberNumber, districts]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,9 +158,11 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
                   <SelectValue placeholder="---" />
                 </SelectTrigger>
                 <SelectContent>
-                  {DISTRICTS.map((d) => (
-                    <SelectItem key={d.id} value={String(d.id)}>{d.code}</SelectItem>
-                  ))}
+                  {districts.length > 0 ? districts.map((d) => (
+                    <SelectItem key={d.id} value={String(d.id)}>{DISTRICT_CODES[d.name] || d.name}</SelectItem>
+                  )) : (
+                    <SelectItem value="" disabled>Loading...</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               <div className="flex items-center px-1 bg-muted/60 text-[11px] font-mono font-medium text-navy-800 border-x border-input">
