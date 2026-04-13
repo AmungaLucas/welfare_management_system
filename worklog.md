@@ -59,3 +59,25 @@ Stage Summary:
 - Dev server accessible at localhost:3000
 - All API routes functional
 - Database seeded with test data
+
+---
+Task ID: 4
+Agent: Full-Stack Developer Subagent
+Task: Integrate welfare-app into root Next.js project
+
+Work Log:
+- Replaced root prisma/schema.prisma with full welfare schema (15+ models)
+- Installed missing dependencies: bcryptjs, jsonwebtoken, xlsx, zustand, sonner, mysql2, type definitions
+- Copied 19 API routes, 20 components (admin/member/shared/layout), 5 lib files
+- Copied app files (page.tsx, layout.tsx, globals.css) and seed file
+- Set up .env with all credentials (DB, NextAuth, M-Pesa, SMS, SMTP)
+- Ran prisma generate, db push, db seed successfully
+- Fixed shadcn/tailwind.css import (removed, not available in root project)
+- Fixed react-hooks/set-state-in-effect lint warning in page.tsx
+- Added welfare-app/ and src/generated/ to eslint ignore
+
+Stage Summary:
+- App fully integrated into root project, running on port 3000
+- HTTP 200 confirmed, lint passes with 0 errors 0 warnings
+- Login: admin@welfare.com / admin123 | Member: ACK/UTW/BTH/001 + 0711000001 / member123
+- 9 districts, 5 sample members, 6 months contributions seeded
