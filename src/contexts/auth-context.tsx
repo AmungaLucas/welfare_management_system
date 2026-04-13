@@ -1,7 +1,7 @@
 'use client';
 
 import {
-  createContext, useContext, useCallback, useEffect, useRef, useSyncExternalStore, ReactNode,
+  createContext, useContext, useCallback, useEffect, useState, useRef, ReactNode,
 } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -33,51 +33,7 @@ interface AuthContextType {
     phone: string,
   ) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
-  refresh: () => void;
-}
-
-/* ------------------------------------------------------------------ */
-/*  External store (lives outside React component tree)                */
-/* ------------------------------------------------------------------ */
-
-let _session: Session | null = null;
-let _status: AuthStatus = 'loading';
-const _listeners = new Set<() => void>();
-
-function _subscribe(fn: () => void) {
-  _listeners.add(fn);
-  return () => _listeners.delete(fn);
-}
-
-const _serverSnap = { session: null as Session | null, status: 'loading' as AuthStatus };
-
-function _getSnap() { return { s: _session, t: _status }; }
-function _getServerSnap() { return { s: null as Session | null, t: 'loading' as AuthStatus }; }
-
-function _emit(s: Session | null, t: AuthStatus) {
-  _session = s;
-  _status = t;
-  _listeners.forEach((fn) => fn());
-}
-
-async function fetchSessionFromServer(): Promise<{ session: Session | null; status: AuthStatus }> {
-  try {
-    const res = await fetch('/api/auth/session', { credentials: 'include' });
-    if (!res.ok) return { session: null, status: 'unauthenticated' };
-    const data: Record<string, unknown> = await res.json();
-    if (data && typeof data === 'object' && 'user' in data && data.user) {
-      return { session: data as unknown as Session, status: 'authenticated' };
-    }
-    return { session: null, status: 'unauthenticated' };
-  } catch {
-    return { session: null, status: 'unauthenticated' };
-  }
-}
-
-async function getCsrf(): Promise<string> {
-  const res = await fetch('/api/auth/csrf', { credentials: 'include' });
-  const data = await res.json();
-  return data.csrfToken;
+  refresh: () => Promise<void>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -87,30 +43,81 @@ async function getCsrf(): Promise<string> {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 /* ------------------------------------------------------------------ */
-/*  Provider                                                           */
+/*  Provider – simple useState + useEffect                             */
 /* ------------------------------------------------------------------ */
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
-  // We only use the version number to know WHEN to read from the store
-  const version = useSyncExternalStore(_subscribe, () => _listeners.size, () => 0);
+  // Both server and client start with 'loading' → no hydration mismatch
+  const [session, setSession] = useState<Session | null>(null);
+  const [status, setStatus] = useState<AuthStatus>('loading');
 
-  // Suppress unused — version triggers re-render when listeners fire
-  void version;
+  /* ---- Fetch session from NextAuth API ---- */
+  const fetchSession = useCallback(async (): Promise<{
+    session: Session | null;
+    status: AuthStatus;
+  }> => {
+    try {
+      const res = await fetch('/api/auth/session', { credentials: 'include' });
+      if (!res.ok) {
+        const result = { session: null, status: 'unauthenticated' as AuthStatus };
+        setSession(null);
+        setStatus('unauthenticated');
+        return result;
+      }
+      const data: Record<string, unknown> = await res.json();
+      if (data && typeof data === 'object' && 'user' in data && data.user) {
+        const s = data as unknown as Session;
+        setSession(s);
+        setStatus('authenticated');
+        return { session: s, status: 'authenticated' };
+      } else {
+        setSession(null);
+        setStatus('unauthenticated');
+        return { session: null, status: 'unauthenticated' };
+      }
+    } catch {
+      setSession(null);
+      setStatus('unauthenticated');
+      return { session: null, status: 'unauthenticated' };
+    }
+  }, []);
 
-  const session = _session;
-  const status = _status;
-
-  /* ---- initial mount + re-fetch on window focus -------------------- */
+  /* ---- On mount: fetch session ---- */
   useEffect(() => {
-    fetchSessionFromServer().then(({ session: s, status: t }) => _emit(s, t));
-    const onFocus = () => fetchSessionFromServer().then(({ session: s, status: t }) => _emit(s, t));
+    // Fetch session on mount and on window focus
+    const load = async () => {
+      try {
+        const res = await fetch('/api/auth/session', { credentials: 'include' });
+        if (res.ok) {
+          const data: Record<string, unknown> = await res.json();
+          if (data && typeof data === 'object' && 'user' in data && data.user) {
+            setSession(data as unknown as Session);
+            setStatus('authenticated');
+            return;
+          }
+        }
+      } catch { /* ignore */ }
+      setSession(null);
+      setStatus('unauthenticated');
+    };
+
+    load();
+
+    const onFocus = () => { void fetchSession(); };
     window.addEventListener('focus', onFocus);
     return () => window.removeEventListener('focus', onFocus);
   }, []);
 
-  /* ---- login (admin – email / password) ---------------------------- */
+  /* ---- Get CSRF token ---- */
+  const getCsrf = useCallback(async (): Promise<string> => {
+    const res = await fetch('/api/auth/csrf', { credentials: 'include' });
+    const data = await res.json();
+    return data.csrfToken;
+  }, []);
+
+  /* ---- Login (admin – email / password) ---- */
   const login = useCallback(
     async (email: string, password: string) => {
       try {
@@ -121,17 +128,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           credentials: 'include',
           body: new URLSearchParams({ email, password, csrfToken }),
         });
-        const { session: s, status: t } = await fetchSessionFromServer();
-        _emit(s, t);
-        return { ok: t === 'authenticated', error: t !== 'authenticated' ? 'Invalid email or password' : undefined };
+        // Always verify by checking the session after login attempt
+        const result = await fetchSession();
+        if (result.status === 'authenticated') {
+          return { ok: true };
+        }
+        return { ok: false, error: 'Invalid email or password' };
       } catch {
         return { ok: false, error: 'Network error – please try again' };
       }
     },
-    [],
+    [getCsrf, fetchSession],
   );
 
-  /* ---- login (member – churchMembershipNo / phone) ----------------- */
+  /* ---- Login (member – churchMembershipNo / phone) ---- */
   const loginMember = useCallback(
     async (churchMembershipNo: string, phone: string) => {
       try {
@@ -142,17 +152,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           credentials: 'include',
           body: new URLSearchParams({ churchMembershipNo, phone, csrfToken }),
         });
-        const { session: s, status: t } = await fetchSessionFromServer();
-        _emit(s, t);
-        return { ok: t === 'authenticated', error: t !== 'authenticated' ? 'Invalid membership number or phone' : undefined };
+        // Always verify by checking the session after login attempt
+        const result = await fetchSession();
+        if (result.status === 'authenticated') {
+          return { ok: true };
+        }
+        return { ok: false, error: 'Invalid membership number or phone' };
       } catch {
         return { ok: false, error: 'Network error – please try again' };
       }
     },
-    [],
+    [getCsrf, fetchSession],
   );
 
-  /* ---- logout ----------------------------------------------------- */
+  /* ---- Logout ---- */
   const logout = useCallback(async () => {
     try {
       const csrfToken = await getCsrf();
@@ -163,17 +176,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: new URLSearchParams({ csrfToken }),
       });
     } catch {
-      // ignore
+      // ignore network errors on logout
     }
-    _emit(null, 'unauthenticated');
+    setSession(null);
+    setStatus('unauthenticated');
     router.refresh();
-  }, [router]);
+  }, [getCsrf, router]);
 
-  /* ---- render ----------------------------------------------------- */
+  /* ---- Render ---- */
   return (
-    <AuthContext.Provider
-      value={{ session, status, login, loginMember, logout, refresh: () => fetchSessionFromServer().then(({ session: s, status: t }) => _emit(s, t)) }}
-    >
+    <AuthContext.Provider value={{ session, status, login, loginMember, logout, refresh: fetchSession }}>
       {children}
     </AuthContext.Provider>
   );
