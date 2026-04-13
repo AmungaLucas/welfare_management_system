@@ -37,6 +37,7 @@ export function ContributionsTable() {
   const [loading, setLoading] = useState(true);
   const [year, setYear] = useState(new Date().getFullYear());
   const [showRecordDialog, setShowRecordDialog] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [summary, setSummary] = useState<Record<string, unknown> | null>(null);
   // Helper to safely render summary values
   const sv = (key: string) => String(summary?.[key] ?? 0);
@@ -67,6 +68,8 @@ export function ContributionsTable() {
 
   const handleRecord = async () => {
     if (!recordForm.churchMembershipNo) { toast.error('Enter membership number'); return; }
+    if (submitting) return;
+    setSubmitting(true);
     try {
       // Find member by membership number
       const mRes = await fetch(`/api/members?search=${recordForm.churchMembershipNo}&limit=1`);
@@ -88,6 +91,7 @@ export function ContributionsTable() {
       if (res.ok) { toast.success('Contribution recorded'); setShowRecordDialog(false); fetchData(); }
       else { const d = await res.json(); toast.error(d.error); }
     } catch { toast.error('Failed'); }
+    finally { setSubmitting(false); }
   };
 
   const handleAutoDeduct = async () => {
@@ -208,7 +212,9 @@ export function ContributionsTable() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setShowRecordDialog(false)}>Cancel</Button>
-                <Button className="bg-navy-900" onClick={handleRecord}>Record</Button>
+                <Button className="bg-navy-900" onClick={handleRecord} disabled={submitting}>
+              {submitting ? 'Recording...' : 'Record'}
+            </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

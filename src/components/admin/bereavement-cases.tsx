@@ -62,6 +62,9 @@ export function BereavementCases() {
   const [loading, setLoading] = useState(true);
   const [showNewDialog, setShowNewDialog] = useState(false);
   const [selectedCase, setSelectedCase] = useState<BereavementCase | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [closingCase, setClosingCase] = useState<string | null>(null);
+  const [disbursingCase, setDisbursingCase] = useState<string | null>(null);
   const [form, setForm] = useState({
     memberId: '',
     memberLabel: '',
@@ -152,6 +155,8 @@ export function BereavementCases() {
 
   const handleCreate = async () => {
     if (!form.memberId || !form.deceasedName) { toast.error('Please select an affected member and enter the deceased name'); return; }
+    if (submitting) return; // prevent double-click
+    setSubmitting(true);
     try {
       const res = await fetch('/api/bereavement', {
         method: 'POST',
@@ -179,21 +184,28 @@ export function BereavementCases() {
         toast.error(d.error);
       }
     } catch { toast.error('Failed'); }
+    finally { setSubmitting(false); }
   };
 
   const handleCloseCase = async (caseId: string) => {
+    if (closingCase) return;
+    setClosingCase(caseId);
     try {
       const res = await fetch(`/api/bereavement/${caseId}/close`, { method: 'POST' });
       if (res.ok) { toast.success('Contributions closed'); fetchCases(); }
     } catch { toast.error('Failed'); }
+    finally { setClosingCase(null); }
   };
 
   const handleDisburse = async (caseId: string) => {
+    if (disbursingCase) return;
+    setDisbursingCase(caseId);
     try {
       const res = await fetch(`/api/bereavement/${caseId}/disburse`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) });
       if (res.ok) { toast.success('Benefit disbursed'); fetchCases(); setSelectedCase(null); }
       else { const d = await res.json(); toast.error(d.error); }
     } catch { toast.error('Failed'); }
+    finally { setDisbursingCase(null); }
   };
 
   return (
@@ -303,6 +315,16 @@ export function BereavementCases() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
+                  <Label className="text-xs">Date of Death</Label>
+                  <Input type="date" value={form.dateOfDeath}
+                    onChange={(e) => setForm({ ...form, dateOfDeath: e.target.value })} />
+                </div>
+                <div>
+                  <Label className="text-xs">Date of Burial</Label>
+                  <Input type="date" value={form.dateOfBurial}
+                    onChange={(e) => setForm({ ...form, dateOfBurial: e.target.value })} />
+                </div>
+                <div>
                   <Label className="text-xs">Burial Location</Label>
                   <Input value={form.burialLocation}
                     onChange={(e) => setForm({ ...form, burialLocation: e.target.value })} />
@@ -311,7 +333,9 @@ export function BereavementCases() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => { clearMember(); setShowNewDialog(false); }}>Cancel</Button>
-              <Button className="bg-red-700 hover:bg-red-800" onClick={handleCreate}>Create Case</Button>
+              <Button className="bg-red-700 hover:bg-red-800" onClick={handleCreate} disabled={submitting}>
+                {submitting ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Creating...</> : 'Create Case'}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -403,13 +427,13 @@ export function BereavementCases() {
               </div>
               <div className="flex gap-2">
                 {selectedCase.status === 'ACTIVE' && (
-                  <Button size="sm" variant="outline" onClick={() => handleCloseCase(selectedCase.id)}>
-                    Close Contributions
+                  <Button size="sm" variant="outline" onClick={() => handleCloseCase(selectedCase.id)} disabled={closingCase === selectedCase.id}>
+                    {closingCase === selectedCase.id ? 'Closing...' : 'Close Contributions'}
                   </Button>
                 )}
                 {selectedCase.memberEligible && selectedCase.status !== 'COMPLETED' && selectedCase.benefitStatus !== 'DISBURSED' && (
-                  <Button size="sm" className="bg-emerald-700 hover:bg-emerald-800" onClick={() => handleDisburse(selectedCase.id)}>
-                    <DollarSign className="h-4 w-4 mr-1" />Disburse Benefit
+                  <Button size="sm" className="bg-emerald-700 hover:bg-emerald-800" onClick={() => handleDisburse(selectedCase.id)} disabled={disbursingCase === selectedCase.id}>
+                    {disbursingCase === selectedCase.id ? 'Disbursing...' : <><DollarSign className="h-4 w-4 mr-1" />Disburse Benefit</>}
                   </Button>
                 )}
               </div>

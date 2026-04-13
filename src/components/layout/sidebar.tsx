@@ -2,7 +2,7 @@
 
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
-import { LayoutDashboard, Users, Wallet, Heart, PiggyBank, BarChart3, Settings, RefreshCw, User } from 'lucide-react';
+import { LayoutDashboard, Users, Wallet, Heart, PiggyBank, BarChart3, Settings, RefreshCw, User, CreditCard } from 'lucide-react';
 
 interface SidebarItem {
   id: string;
@@ -13,25 +13,21 @@ interface SidebarItem {
 export const adminNav: SidebarItem[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'members', label: 'Members', icon: Users },
-  { id: 'contributions', label: 'Contributions', icon: Wallet },
-  { id: 'bereavement', label: 'Bereavement', icon: Heart },
+  { id: 'payments', label: 'Payments', icon: CreditCard },
   { id: 'wallets', label: 'Wallets', icon: PiggyBank },
   { id: 'reports', label: 'Reports', icon: BarChart3 },
   { id: 'settings', label: 'Settings', icon: Settings },
-  { id: 'renewals', label: 'Renewals', icon: RefreshCw },
 ];
 
 export const memberNav: SidebarItem[] = [
   { id: 'member-overview', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'member-profile', label: 'My Profile', icon: User },
-  { id: 'member-contributions', label: 'Contributions', icon: Wallet },
-  { id: 'member-cases', label: 'Cases', icon: Heart },
-  { id: 'member-renewals', label: 'Renewals', icon: RefreshCw },
+  { id: 'member-payments', label: 'Payments', icon: CreditCard },
 ];
 
 interface SidebarProps {
   activeView: string;
-  onViewChange: (view: 'login' | 'register' | 'overview' | 'members' | 'contributions' | 'bereavement' | 'wallet' | 'reports' | 'settings' | 'renewals' | 'member-overview' | 'member-profile' | 'member-contributions' | 'member-cases' | 'member-renewals') => void;
+  onViewChange: (view: 'login' | 'register' | 'overview' | 'members' | 'payments' | 'wallets' | 'wallet' | 'reports' | 'settings' | 'member-overview' | 'member-profile' | 'member-payments') => void;
   role: 'ADMIN' | 'MEMBER';
 }
 
@@ -75,7 +71,7 @@ export function Sidebar({ activeView, onViewChange, role }: SidebarProps) {
 
 interface MobileNavProps {
   activeView: string;
-  onViewChange: (view: 'login' | 'register' | 'overview' | 'members' | 'contributions' | 'bereavement' | 'wallet' | 'reports' | 'settings' | 'renewals' | 'member-overview' | 'member-profile' | 'member-contributions' | 'member-cases' | 'member-renewals') => void;
+  onViewChange: (view: 'login' | 'register' | 'overview' | 'members' | 'payments' | 'wallets' | 'wallet' | 'reports' | 'settings' | 'member-overview' | 'member-profile' | 'member-payments') => void;
   role: 'ADMIN' | 'MEMBER';
 }
 
