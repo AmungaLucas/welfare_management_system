@@ -85,3 +85,26 @@ Stage Summary:
 - Deletion is protected by confirmation dialog with clear warning
 - All related data (contributions, attendees, disbursements, notifications) is cleaned up in a transaction
 - Files changed: `src/app/api/bereavement/[id]/route.ts`, `src/components/admin/bereavement-cases.tsx`
+
+---
+Task ID: 5
+Agent: Main Agent
+Task: Review original design vs current implementation and fix gaps
+
+Work Log:
+- Read uploaded original design file (upload/page.tsx) - single 1900+ line monolithic component
+- Compared with current modular implementation across admin/member/shared components
+- Identified 6 major gaps and fixed all of them
+- Enhanced dashboard stats API to return additional member profile fields
+- Rewrote member-overview.tsx: added M-Pesa paybill card, membership info panel with arrears warnings, wallet/transactions panel, M-Pesa receipt dialog for case payments
+- Rewrote member-contributions.tsx: added Make Payment button with M-Pesa receipt dialog, receipt column in table
+- Rewrote member-cases.tsx: added M-Pesa receipt dialog before recording payment
+- Enhanced bereavement-cases.tsx: added progress bars to case cards
+- All lint checks pass cleanly
+
+Stage Summary:
+- Member overview matches original design with M-Pesa info, membership panel, arrears warnings
+- Member contributions has proper Make Payment with M-Pesa receipt entry
+- Member cases prompts for M-Pesa receipt before recording payment
+- Admin bereavement cards show progress bars
+- Files changed: `src/app/api/dashboard/stats/route.ts`, `src/components/member/member-overview.tsx`, `src/components/member/member-contributions.tsx`, `src/components/member/member-cases.tsx`, `src/components/admin/bereavement-cases.tsx`

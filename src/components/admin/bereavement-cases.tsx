@@ -416,9 +416,24 @@ export function BereavementCases() {
                     )}
                   </div>
                 </div>
-                <div className="mt-3 flex items-center justify-between">
+                {/* Progress Bar */}
+                <div className="mt-3">
+                  <div className="h-2 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${Math.min(100, c.totalExpected > 0 ? (Number(c.totalCollected) / (Number(c.contributionPerMember) * c.totalExpected)) * 100 : 0)}%`,
+                        backgroundColor: Number(c.totalCollected) >= Number(c.benefitAmount) ? '#10b981' : '#1e3a5f',
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-between mt-1 text-[10px] text-muted-foreground">
+                    <span>Ksh {Number(c.totalCollected).toLocaleString()} collected</span>
+                    <span>{c.totalExpected} members expected</span>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center justify-between">
                   <div className="text-xs space-y-0.5">
-                    <p className="text-muted-foreground">Collected: <span className="font-medium text-navy-900">Ksh {Number(c.totalCollected).toLocaleString()}</span></p>
                     <p className="text-muted-foreground">Benefit: <span className="font-medium">Ksh {Number(c.benefitAmount).toLocaleString()}</span></p>
                   </div>
                   <div className="flex items-center gap-1">

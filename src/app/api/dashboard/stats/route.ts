@@ -94,6 +94,11 @@ export async function GET(req: NextRequest) {
         select: {
           walletBalance: true, status: true, consecutiveArrears: true,
           totalDefaultEvents: true,
+          firstName: true, lastName: true, churchMembershipNo: true,
+          welfareNo: true, churchDurationYears: true,
+          dateJoinedWelfare: true, registrationFeePaid: true,
+          joiningFeePaid: true, phone: true, email: true,
+          district: { select: { name: true } },
         },
       });
 
