@@ -268,7 +268,7 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-      <DialogContent className="max-w-3xl max-h-[92vh] p-0 gap-0" aria-describedby={undefined}>
+      <DialogContent className="max-w-4xl max-h-[94vh] p-0 gap-0" aria-describedby={undefined}>
         {loading ? (
           <div className="flex items-center justify-center py-24">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -277,7 +277,7 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
         ) : member ? (
           <>
             {/* ── HEADER ── */}
-            <div className="px-6 pt-6 pb-4">
+            <div className="px-8 pt-6 pb-5">
               <div className="flex items-start gap-4">
                 {/* Avatar */}
                 <div className={`h-14 w-14 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0 ${getAvatarColor(member.firstName + member.lastName)}`}>
@@ -326,29 +326,29 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
               )}
 
               {/* Quick Stats Row */}
-              <div className="grid grid-cols-4 gap-3 mt-4">
-                <div className="bg-muted/50 rounded-lg p-3 text-center">
+              <div className="grid grid-cols-4 gap-4 mt-5">
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Wallet className="h-4 w-4 text-teal-600 mx-auto mb-1" />
                   <p className={`text-sm font-bold ${Number(member.walletBalance) > 0 ? 'text-teal-700' : 'text-muted-foreground'}`}>
                     {formatCurrency(Number(member.walletBalance))}
                   </p>
                   <p className="text-[10px] text-muted-foreground">Wallet</p>
                 </div>
-                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Receipt className="h-4 w-4 text-navy-600 mx-auto mb-1" />
                   <p className="text-sm font-bold text-navy-800">
                     {formatCurrency(totalContributions)}
                   </p>
                   <p className="text-[10px] text-muted-foreground">Contributions</p>
                 </div>
-                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <Heart className="h-4 w-4 text-red-500 mx-auto mb-1" />
                   <p className="text-sm font-bold text-red-700">
                     {formatCurrency(totalCasePaid)}
                   </p>
                   <p className="text-[10px] text-muted-foreground">Case Contributions</p>
                 </div>
-                <div className="bg-muted/50 rounded-lg p-3 text-center">
+                <div className="bg-muted/50 rounded-lg p-4 text-center">
                   <AlertTriangle className="h-4 w-4 text-amber-600 mx-auto mb-1" />
                   <p className={`text-sm font-bold ${member.consecutiveArrears > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
                     {member.consecutiveArrears}
@@ -362,7 +362,7 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
 
             {/* ── TABS ── */}
             <Tabs defaultValue="overview" className="w-full">
-              <div className="px-6 pt-3">
+              <div className="px-8 pt-4">
                 <TabsList className="w-full">
                   <TabsTrigger value="overview" className="flex-1 text-xs">
                     <User className="h-3 w-3 mr-1" />Overview
@@ -379,27 +379,27 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
                 </TabsList>
               </div>
 
-              <ScrollArea className="max-h-[45vh]">
-                <div className="px-6 pb-6 pt-3">
+              <ScrollArea className="max-h-[55vh]">
+                <div className="px-8 pb-6 pt-4">
                   {/* ── OVERVIEW TAB ── */}
                   <TabsContent value="overview" className="mt-0">
-                    <div className="space-y-5">
+                    <div className="space-y-6">
                       {/* Contact Information */}
                       <div>
                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Contact Information</h4>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                             <Phone className="h-4 w-4 text-muted-foreground shrink-0" />
                             <div>
                               <p className="text-[10px] text-muted-foreground">Phone</p>
                               <p className="text-sm font-medium">{member.phone}</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/30">
+                          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30">
                             <Mail className="h-4 w-4 text-muted-foreground shrink-0" />
                             <div>
                               <p className="text-[10px] text-muted-foreground">Email</p>
-                              <p className="text-sm font-medium">{member.email || '\u2014'}</p>
+                              <p className="text-sm font-medium truncate">{member.email || '\u2014'}</p>
                             </div>
                           </div>
                         </div>
@@ -408,38 +408,38 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
                       {/* Church & Welfare */}
                       <div>
                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Church &amp; Welfare</h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          <div className="p-2.5 rounded-lg bg-muted/30">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                          <div className="p-3 rounded-lg bg-muted/30">
                             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
                               <Church className="h-3 w-3" />Church Reg. No.
                             </div>
                             <p className="text-sm font-mono font-medium">{member.churchMembershipNo}</p>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-muted/30">
+                          <div className="p-3 rounded-lg bg-muted/30">
                             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
                               <MapPin className="h-3 w-3" />District
                             </div>
                             <p className="text-sm font-medium">{member.district?.name}</p>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-muted/30">
+                          <div className="p-3 rounded-lg bg-muted/30">
                             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
                               <Clock className="h-3 w-3" />Church Years
                             </div>
                             <p className="text-sm font-medium">{member.churchDurationYears ? `${member.churchDurationYears} years` : '\u2014'}</p>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-muted/30">
+                          <div className="p-3 rounded-lg bg-muted/30">
                             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
                               <Calendar className="h-3 w-3" />Join Date
                             </div>
                             <p className="text-sm font-medium">{formatDate(member.dateJoinedWelfare)}</p>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-muted/30">
+                          <div className="p-3 rounded-lg bg-muted/30">
                             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
                               <Calendar className="h-3 w-3" />Church Member Since
                             </div>
                             <p className="text-sm font-medium">{formatDate(member.churchMembershipDate)}</p>
                           </div>
-                          <div className="p-2.5 rounded-lg bg-muted/30">
+                          <div className="p-3 rounded-lg bg-muted/30">
                             <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mb-1">
                               <User className="h-3 w-3" />Member Type
                             </div>
@@ -453,29 +453,29 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
                       {/* Fees & Arrears */}
                       <div>
                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Fees &amp; Standing</h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                          <div className={`p-3 rounded-lg border text-center ${Number(member.registrationFeePaid) > 0 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                          <div className={`p-4 rounded-lg border text-center ${Number(member.registrationFeePaid) > 0 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
                             <CheckCircle className={`h-4 w-4 mx-auto mb-1 ${Number(member.registrationFeePaid) > 0 ? 'text-emerald-600' : 'text-red-500'}`} />
                             <p className="text-xs font-medium">Registration Fee</p>
                             <Badge className={`text-[10px] mt-1 ${Number(member.registrationFeePaid) > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
                               {Number(member.registrationFeePaid) > 0 ? 'Paid' : 'Unpaid'}
                             </Badge>
                           </div>
-                          <div className={`p-3 rounded-lg border text-center ${Number(member.joiningFeePaid) > 0 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
+                          <div className={`p-4 rounded-lg border text-center ${Number(member.joiningFeePaid) > 0 ? 'border-emerald-200 bg-emerald-50' : 'border-red-200 bg-red-50'}`}>
                             <CheckCircle className={`h-4 w-4 mx-auto mb-1 ${Number(member.joiningFeePaid) > 0 ? 'text-emerald-600' : 'text-red-500'}`} />
                             <p className="text-xs font-medium">Joining Fee</p>
                             <Badge className={`text-[10px] mt-1 ${Number(member.joiningFeePaid) > 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
                               {Number(member.joiningFeePaid) > 0 ? 'Paid' : 'Unpaid'}
                             </Badge>
                           </div>
-                          <div className={`p-3 rounded-lg border text-center ${member.consecutiveArrears === 0 ? 'border-emerald-200 bg-emerald-50' : member.consecutiveArrears >= 3 ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'}`}>
+                          <div className={`p-4 rounded-lg border text-center ${member.consecutiveArrears === 0 ? 'border-emerald-200 bg-emerald-50' : member.consecutiveArrears >= 3 ? 'border-red-200 bg-red-50' : 'border-amber-200 bg-amber-50'}`}>
                             <AlertTriangle className={`h-4 w-4 mx-auto mb-1 ${member.consecutiveArrears === 0 ? 'text-emerald-600' : member.consecutiveArrears >= 3 ? 'text-red-500' : 'text-amber-500'}`} />
                             <p className="text-xs font-medium">Arrears</p>
                             <p className={`text-sm font-bold ${member.consecutiveArrears === 0 ? 'text-emerald-700' : member.consecutiveArrears >= 3 ? 'text-red-700' : 'text-amber-700'}`}>
                               {member.consecutiveArrears} missed
                             </p>
                           </div>
-                          <div className={`p-3 rounded-lg border text-center ${member.totalDefaultEvents === 0 ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
+                          <div className={`p-4 rounded-lg border text-center ${member.totalDefaultEvents === 0 ? 'border-emerald-200 bg-emerald-50' : 'border-amber-200 bg-amber-50'}`}>
                             <Shield className={`h-4 w-4 mx-auto mb-1 ${member.totalDefaultEvents === 0 ? 'text-emerald-600' : 'text-amber-500'}`} />
                             <p className="text-xs font-medium">Default Events</p>
                             <p className={`text-sm font-bold ${member.totalDefaultEvents === 0 ? 'text-emerald-700' : 'text-amber-700'}`}>
@@ -489,12 +489,12 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
                       {member.user && (
                         <div>
                           <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Account</h4>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="p-2.5 rounded-lg bg-muted/30">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-3 rounded-lg bg-muted/30">
                               <p className="text-[10px] text-muted-foreground">Login Email</p>
                               <p className="text-sm font-mono font-medium">{member.user.email}</p>
                             </div>
-                            <div className="p-2.5 rounded-lg bg-muted/30">
+                            <div className="p-3 rounded-lg bg-muted/30">
                               <p className="text-[10px] text-muted-foreground">Account Status</p>
                               <Badge variant={member.user.isActive ? 'default' : 'destructive'} className="text-[10px]">
                                 {member.user.isActive ? 'Active' : 'Inactive'}
@@ -622,12 +622,12 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
                       {/* Family Members */}
                       <div>
                         <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Family Members</h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {member.spouseName ? (
                             <div className="p-3 rounded-lg border bg-muted/20">
                               <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <div className="h-8 w-8 rounded-full bg-pink-100 flex items-center justify-center">
+                                <div className="flex items-center gap-3">
+                                  <div className="h-9 w-9 rounded-full bg-pink-100 flex items-center justify-center">
                                     <Heart className="h-4 w-4 text-pink-600" />
                                   </div>
                                   <div>
@@ -653,7 +653,7 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
                             <div className="p-3 rounded-lg border bg-muted/20">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                  <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                  <div className="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center">
                                     <User className="h-4 w-4 text-blue-600" />
                                   </div>
                                   <div>
@@ -679,7 +679,7 @@ export function MemberDetailDialog({ memberId, open, onClose }: MemberDetailDial
                             <div className="p-3 rounded-lg border bg-muted/20">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
-                                  <div className="h-8 w-8 rounded-full bg-violet-100 flex items-center justify-center">
+                                  <div className="h-9 w-9 rounded-full bg-violet-100 flex items-center justify-center">
                                     <User className="h-4 w-4 text-violet-600" />
                                   </div>
                                   <div>
