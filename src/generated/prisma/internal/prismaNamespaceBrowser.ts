@@ -71,6 +71,9 @@ export type ModelName = (typeof ModelName)[keyof typeof ModelName]
  */
 
 export const TransactionIsolationLevel = runtime.makeStrictEnum({
+  ReadUncommitted: 'ReadUncommitted',
+  ReadCommitted: 'ReadCommitted',
+  RepeatableRead: 'RepeatableRead',
   Serializable: 'Serializable'
 } as const)
 
@@ -331,10 +334,157 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const DistrictOrderByRelevanceFieldEnum = {
+  name: 'name'
+} as const
+
+export type DistrictOrderByRelevanceFieldEnum = (typeof DistrictOrderByRelevanceFieldEnum)[keyof typeof DistrictOrderByRelevanceFieldEnum]
+
+
 export const NullsOrder = {
   first: 'first',
   last: 'last'
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const UserOrderByRelevanceFieldEnum = {
+  id: 'id',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  phone: 'phone'
+} as const
+
+export type UserOrderByRelevanceFieldEnum = (typeof UserOrderByRelevanceFieldEnum)[keyof typeof UserOrderByRelevanceFieldEnum]
+
+
+export const MemberOrderByRelevanceFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  churchMembershipNo: 'churchMembershipNo',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  otherNames: 'otherNames',
+  phone: 'phone',
+  email: 'email',
+  spouseName: 'spouseName',
+  fatherName: 'fatherName',
+  motherName: 'motherName',
+  nextOfKinName: 'nextOfKinName',
+  nextOfKinPhone: 'nextOfKinPhone',
+  nextOfKinRelationship: 'nextOfKinRelationship'
+} as const
+
+export type MemberOrderByRelevanceFieldEnum = (typeof MemberOrderByRelevanceFieldEnum)[keyof typeof MemberOrderByRelevanceFieldEnum]
+
+
+export const FamilyChildOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  fullName: 'fullName'
+} as const
+
+export type FamilyChildOrderByRelevanceFieldEnum = (typeof FamilyChildOrderByRelevanceFieldEnum)[keyof typeof FamilyChildOrderByRelevanceFieldEnum]
+
+
+export const ContributionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  mpesaRef: 'mpesaRef',
+  transactionRef: 'transactionRef',
+  recordedBy: 'recordedBy',
+  notes: 'notes'
+} as const
+
+export type ContributionOrderByRelevanceFieldEnum = (typeof ContributionOrderByRelevanceFieldEnum)[keyof typeof ContributionOrderByRelevanceFieldEnum]
+
+
+export const WalletTransactionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  description: 'description',
+  referenceId: 'referenceId',
+  referenceType: 'referenceType'
+} as const
+
+export type WalletTransactionOrderByRelevanceFieldEnum = (typeof WalletTransactionOrderByRelevanceFieldEnum)[keyof typeof WalletTransactionOrderByRelevanceFieldEnum]
+
+
+export const BereavementCaseOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  deceasedName: 'deceasedName',
+  burialLocation: 'burialLocation',
+  eligibilityNotes: 'eligibilityNotes',
+  loggedBy: 'loggedBy'
+} as const
+
+export type BereavementCaseOrderByRelevanceFieldEnum = (typeof BereavementCaseOrderByRelevanceFieldEnum)[keyof typeof BereavementCaseOrderByRelevanceFieldEnum]
+
+
+export const CaseContributionOrderByRelevanceFieldEnum = {
+  id: 'id',
+  caseId: 'caseId',
+  memberId: 'memberId',
+  mpesaRef: 'mpesaRef',
+  notes: 'notes'
+} as const
+
+export type CaseContributionOrderByRelevanceFieldEnum = (typeof CaseContributionOrderByRelevanceFieldEnum)[keyof typeof CaseContributionOrderByRelevanceFieldEnum]
+
+
+export const BurialAttendeeOrderByRelevanceFieldEnum = {
+  id: 'id',
+  caseId: 'caseId',
+  memberId: 'memberId',
+  role: 'role'
+} as const
+
+export type BurialAttendeeOrderByRelevanceFieldEnum = (typeof BurialAttendeeOrderByRelevanceFieldEnum)[keyof typeof BurialAttendeeOrderByRelevanceFieldEnum]
+
+
+export const BenefitDisbursementOrderByRelevanceFieldEnum = {
+  id: 'id',
+  caseId: 'caseId',
+  memberId: 'memberId',
+  disbursementMethod: 'disbursementMethod',
+  referenceNo: 'referenceNo',
+  receivedByName: 'receivedByName',
+  receivedByIdNo: 'receivedByIdNo',
+  notes: 'notes'
+} as const
+
+export type BenefitDisbursementOrderByRelevanceFieldEnum = (typeof BenefitDisbursementOrderByRelevanceFieldEnum)[keyof typeof BenefitDisbursementOrderByRelevanceFieldEnum]
+
+
+export const AnnualRenewalOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  mpesaRef: 'mpesaRef',
+  initiatedBy: 'initiatedBy'
+} as const
+
+export type AnnualRenewalOrderByRelevanceFieldEnum = (typeof AnnualRenewalOrderByRelevanceFieldEnum)[keyof typeof AnnualRenewalOrderByRelevanceFieldEnum]
+
+
+export const NotificationOrderByRelevanceFieldEnum = {
+  id: 'id',
+  memberId: 'memberId',
+  bereavementCaseId: 'bereavementCaseId',
+  subject: 'subject',
+  message: 'message',
+  recipientPhone: 'recipientPhone',
+  recipientEmail: 'recipientEmail',
+  errorMessage: 'errorMessage'
+} as const
+
+export type NotificationOrderByRelevanceFieldEnum = (typeof NotificationOrderByRelevanceFieldEnum)[keyof typeof NotificationOrderByRelevanceFieldEnum]
+
+
+export const SettingsOrderByRelevanceFieldEnum = {
+  id: 'id'
+} as const
+
+export type SettingsOrderByRelevanceFieldEnum = (typeof SettingsOrderByRelevanceFieldEnum)[keyof typeof SettingsOrderByRelevanceFieldEnum]
 

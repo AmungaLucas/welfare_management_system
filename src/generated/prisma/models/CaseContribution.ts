@@ -286,6 +286,7 @@ export type CaseContributionOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   case?: Prisma.BereavementCaseOrderByWithRelationInput
   member?: Prisma.MemberOrderByWithRelationInput
+  _relevance?: Prisma.CaseContributionOrderByRelevanceInput
 }
 
 export type CaseContributionWhereUniqueInput = Prisma.AtLeast<{
@@ -448,6 +449,12 @@ export type CaseContributionListRelationFilter = {
 
 export type CaseContributionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type CaseContributionOrderByRelevanceInput = {
+  fields: Prisma.CaseContributionOrderByRelevanceFieldEnum | Prisma.CaseContributionOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type CaseContributionCaseIdMemberIdCompoundUniqueInput = {
@@ -628,6 +635,7 @@ export type CaseContributionCreateOrConnectWithoutMemberInput = {
 
 export type CaseContributionCreateManyMemberInputEnvelope = {
   data: Prisma.CaseContributionCreateManyMemberInput | Prisma.CaseContributionCreateManyMemberInput[]
+  skipDuplicates?: boolean
 }
 
 export type CaseContributionUpsertWithWhereUniqueWithoutMemberInput = {
@@ -696,6 +704,7 @@ export type CaseContributionCreateOrConnectWithoutCaseInput = {
 
 export type CaseContributionCreateManyCaseInputEnvelope = {
   data: Prisma.CaseContributionCreateManyCaseInput | Prisma.CaseContributionCreateManyCaseInput[]
+  skipDuplicates?: boolean
 }
 
 export type CaseContributionUpsertWithWhereUniqueWithoutCaseInput = {
@@ -836,37 +845,7 @@ export type CaseContributionSelect<ExtArgs extends runtime.Types.Extensions.Inte
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["caseContribution"]>
 
-export type CaseContributionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  caseId?: boolean
-  memberId?: boolean
-  expectedAmount?: boolean
-  paidAmount?: boolean
-  paymentMethod?: boolean
-  mpesaRef?: boolean
-  status?: boolean
-  paidDate?: boolean
-  notes?: boolean
-  createdAt?: boolean
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["caseContribution"]>
 
-export type CaseContributionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  caseId?: boolean
-  memberId?: boolean
-  expectedAmount?: boolean
-  paidAmount?: boolean
-  paymentMethod?: boolean
-  mpesaRef?: boolean
-  status?: boolean
-  paidDate?: boolean
-  notes?: boolean
-  createdAt?: boolean
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["caseContribution"]>
 
 export type CaseContributionSelectScalar = {
   id?: boolean
@@ -884,14 +863,6 @@ export type CaseContributionSelectScalar = {
 
 export type CaseContributionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "caseId" | "memberId" | "expectedAmount" | "paidAmount" | "paymentMethod" | "mpesaRef" | "status" | "paidDate" | "notes" | "createdAt", ExtArgs["result"]["caseContribution"]>
 export type CaseContributionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type CaseContributionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type CaseContributionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }
@@ -1032,30 +1003,6 @@ export interface CaseContributionDelegate<ExtArgs extends runtime.Types.Extensio
   createMany<T extends CaseContributionCreateManyArgs>(args?: Prisma.SelectSubset<T, CaseContributionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many CaseContributions and returns the data saved in the database.
-   * @param {CaseContributionCreateManyAndReturnArgs} args - Arguments to create many CaseContributions.
-   * @example
-   * // Create many CaseContributions
-   * const caseContribution = await prisma.caseContribution.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many CaseContributions and only return the `id`
-   * const caseContributionWithIdOnly = await prisma.caseContribution.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends CaseContributionCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, CaseContributionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CaseContributionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a CaseContribution.
    * @param {CaseContributionDeleteArgs} args - Arguments to delete one CaseContribution.
    * @example
@@ -1118,36 +1065,6 @@ export interface CaseContributionDelegate<ExtArgs extends runtime.Types.Extensio
    * 
    */
   updateMany<T extends CaseContributionUpdateManyArgs>(args: Prisma.SelectSubset<T, CaseContributionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more CaseContributions and returns the data updated in the database.
-   * @param {CaseContributionUpdateManyAndReturnArgs} args - Arguments to update many CaseContributions.
-   * @example
-   * // Update many CaseContributions
-   * const caseContribution = await prisma.caseContribution.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more CaseContributions and only return the `id`
-   * const caseContributionWithIdOnly = await prisma.caseContribution.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends CaseContributionUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, CaseContributionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CaseContributionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one CaseContribution.
@@ -1579,28 +1496,7 @@ export type CaseContributionCreateManyArgs<ExtArgs extends runtime.Types.Extensi
    * The data used to create many CaseContributions.
    */
   data: Prisma.CaseContributionCreateManyInput | Prisma.CaseContributionCreateManyInput[]
-}
-
-/**
- * CaseContribution createManyAndReturn
- */
-export type CaseContributionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the CaseContribution
-   */
-  select?: Prisma.CaseContributionSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the CaseContribution
-   */
-  omit?: Prisma.CaseContributionOmit<ExtArgs> | null
-  /**
-   * The data used to create many CaseContributions.
-   */
-  data: Prisma.CaseContributionCreateManyInput | Prisma.CaseContributionCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.CaseContributionIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1645,36 +1541,6 @@ export type CaseContributionUpdateManyArgs<ExtArgs extends runtime.Types.Extensi
    * Limit how many CaseContributions to update.
    */
   limit?: number
-}
-
-/**
- * CaseContribution updateManyAndReturn
- */
-export type CaseContributionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the CaseContribution
-   */
-  select?: Prisma.CaseContributionSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the CaseContribution
-   */
-  omit?: Prisma.CaseContributionOmit<ExtArgs> | null
-  /**
-   * The data used to update CaseContributions.
-   */
-  data: Prisma.XOR<Prisma.CaseContributionUpdateManyMutationInput, Prisma.CaseContributionUncheckedUpdateManyInput>
-  /**
-   * Filter which CaseContributions to update
-   */
-  where?: Prisma.CaseContributionWhereInput
-  /**
-   * Limit how many CaseContributions to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.CaseContributionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

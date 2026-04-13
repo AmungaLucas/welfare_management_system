@@ -217,6 +217,7 @@ export type DistrictOrderByWithRelationInput = {
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   members?: Prisma.MemberOrderByRelationAggregateInput
+  _relevance?: Prisma.DistrictOrderByRelevanceInput
 }
 
 export type DistrictWhereUniqueInput = Prisma.AtLeast<{
@@ -300,6 +301,12 @@ export type DistrictUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type DistrictOrderByRelevanceInput = {
+  fields: Prisma.DistrictOrderByRelevanceFieldEnum | Prisma.DistrictOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type DistrictCountOrderByAggregateInput = {
@@ -452,19 +459,7 @@ export type DistrictSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   _count?: boolean | Prisma.DistrictCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["district"]>
 
-export type DistrictSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  name?: boolean
-  isActive?: boolean
-  createdAt?: boolean
-}, ExtArgs["result"]["district"]>
 
-export type DistrictSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  name?: boolean
-  isActive?: boolean
-  createdAt?: boolean
-}, ExtArgs["result"]["district"]>
 
 export type DistrictSelectScalar = {
   id?: boolean
@@ -478,8 +473,6 @@ export type DistrictInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   members?: boolean | Prisma.District$membersArgs<ExtArgs>
   _count?: boolean | Prisma.DistrictCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type DistrictIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type DistrictIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $DistrictPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "District"
@@ -609,30 +602,6 @@ export interface DistrictDelegate<ExtArgs extends runtime.Types.Extensions.Inter
   createMany<T extends DistrictCreateManyArgs>(args?: Prisma.SelectSubset<T, DistrictCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many Districts and returns the data saved in the database.
-   * @param {DistrictCreateManyAndReturnArgs} args - Arguments to create many Districts.
-   * @example
-   * // Create many Districts
-   * const district = await prisma.district.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many Districts and only return the `id`
-   * const districtWithIdOnly = await prisma.district.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends DistrictCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, DistrictCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DistrictPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a District.
    * @param {DistrictDeleteArgs} args - Arguments to delete one District.
    * @example
@@ -695,36 +664,6 @@ export interface DistrictDelegate<ExtArgs extends runtime.Types.Extensions.Inter
    * 
    */
   updateMany<T extends DistrictUpdateManyArgs>(args: Prisma.SelectSubset<T, DistrictUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more Districts and returns the data updated in the database.
-   * @param {DistrictUpdateManyAndReturnArgs} args - Arguments to update many Districts.
-   * @example
-   * // Update many Districts
-   * const district = await prisma.district.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more Districts and only return the `id`
-   * const districtWithIdOnly = await prisma.district.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends DistrictUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, DistrictUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$DistrictPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one District.
@@ -1148,24 +1087,7 @@ export type DistrictCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * The data used to create many Districts.
    */
   data: Prisma.DistrictCreateManyInput | Prisma.DistrictCreateManyInput[]
-}
-
-/**
- * District createManyAndReturn
- */
-export type DistrictCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the District
-   */
-  select?: Prisma.DistrictSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the District
-   */
-  omit?: Prisma.DistrictOmit<ExtArgs> | null
-  /**
-   * The data used to create many Districts.
-   */
-  data: Prisma.DistrictCreateManyInput | Prisma.DistrictCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1198,32 +1120,6 @@ export type DistrictUpdateArgs<ExtArgs extends runtime.Types.Extensions.Internal
  * District updateMany
  */
 export type DistrictUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * The data used to update Districts.
-   */
-  data: Prisma.XOR<Prisma.DistrictUpdateManyMutationInput, Prisma.DistrictUncheckedUpdateManyInput>
-  /**
-   * Filter which Districts to update
-   */
-  where?: Prisma.DistrictWhereInput
-  /**
-   * Limit how many Districts to update.
-   */
-  limit?: number
-}
-
-/**
- * District updateManyAndReturn
- */
-export type DistrictUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the District
-   */
-  select?: Prisma.DistrictSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the District
-   */
-  omit?: Prisma.DistrictOmit<ExtArgs> | null
   /**
    * The data used to update Districts.
    */

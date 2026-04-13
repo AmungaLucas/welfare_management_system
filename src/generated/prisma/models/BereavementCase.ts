@@ -412,6 +412,7 @@ export type BereavementCaseOrderByWithRelationInput = {
   caseContributions?: Prisma.CaseContributionOrderByRelationAggregateInput
   burialAttendees?: Prisma.BurialAttendeeOrderByRelationAggregateInput
   notifications?: Prisma.NotificationOrderByRelationAggregateInput
+  _relevance?: Prisma.BereavementCaseOrderByRelevanceInput
 }
 
 export type BereavementCaseWhereUniqueInput = Prisma.AtLeast<{
@@ -715,6 +716,12 @@ export type BereavementCaseOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type BereavementCaseOrderByRelevanceInput = {
+  fields: Prisma.BereavementCaseOrderByRelevanceFieldEnum | Prisma.BereavementCaseOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
+}
+
 export type BereavementCaseCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
@@ -1000,6 +1007,7 @@ export type BereavementCaseCreateOrConnectWithoutMemberInput = {
 
 export type BereavementCaseCreateManyMemberInputEnvelope = {
   data: Prisma.BereavementCaseCreateManyMemberInput | Prisma.BereavementCaseCreateManyMemberInput[]
+  skipDuplicates?: boolean
 }
 
 export type BereavementCaseUpsertWithWhereUniqueWithoutMemberInput = {
@@ -1764,59 +1772,7 @@ export type BereavementCaseSelect<ExtArgs extends runtime.Types.Extensions.Inter
   _count?: boolean | Prisma.BereavementCaseCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["bereavementCase"]>
 
-export type BereavementCaseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  memberId?: boolean
-  deceasedName?: boolean
-  deceasedRelationship?: boolean
-  deceasedAge?: boolean
-  dateOfDeath?: boolean
-  dateOfBurial?: boolean
-  burialLocation?: boolean
-  category?: boolean
-  contributionPerMember?: boolean
-  totalExpected?: boolean
-  totalCollected?: boolean
-  benefitAmount?: boolean
-  benefitStatus?: boolean
-  benefitDisbursedDate?: boolean
-  memberEligible?: boolean
-  eligibilityNotes?: boolean
-  waitingPeriodSatisfied?: boolean
-  status?: boolean
-  contributionDeadline?: boolean
-  loggedBy?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["bereavementCase"]>
 
-export type BereavementCaseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  memberId?: boolean
-  deceasedName?: boolean
-  deceasedRelationship?: boolean
-  deceasedAge?: boolean
-  dateOfDeath?: boolean
-  dateOfBurial?: boolean
-  burialLocation?: boolean
-  category?: boolean
-  contributionPerMember?: boolean
-  totalExpected?: boolean
-  totalCollected?: boolean
-  benefitAmount?: boolean
-  benefitStatus?: boolean
-  benefitDisbursedDate?: boolean
-  memberEligible?: boolean
-  eligibilityNotes?: boolean
-  waitingPeriodSatisfied?: boolean
-  status?: boolean
-  contributionDeadline?: boolean
-  loggedBy?: boolean
-  createdAt?: boolean
-  updatedAt?: boolean
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["bereavementCase"]>
 
 export type BereavementCaseSelectScalar = {
   id?: boolean
@@ -1852,12 +1808,6 @@ export type BereavementCaseInclude<ExtArgs extends runtime.Types.Extensions.Inte
   burialAttendees?: boolean | Prisma.BereavementCase$burialAttendeesArgs<ExtArgs>
   notifications?: boolean | Prisma.BereavementCase$notificationsArgs<ExtArgs>
   _count?: boolean | Prisma.BereavementCaseCountOutputTypeDefaultArgs<ExtArgs>
-}
-export type BereavementCaseIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type BereavementCaseIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }
 
 export type $BereavementCasePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -2011,30 +1961,6 @@ export interface BereavementCaseDelegate<ExtArgs extends runtime.Types.Extension
   createMany<T extends BereavementCaseCreateManyArgs>(args?: Prisma.SelectSubset<T, BereavementCaseCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many BereavementCases and returns the data saved in the database.
-   * @param {BereavementCaseCreateManyAndReturnArgs} args - Arguments to create many BereavementCases.
-   * @example
-   * // Create many BereavementCases
-   * const bereavementCase = await prisma.bereavementCase.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many BereavementCases and only return the `id`
-   * const bereavementCaseWithIdOnly = await prisma.bereavementCase.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends BereavementCaseCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, BereavementCaseCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BereavementCasePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a BereavementCase.
    * @param {BereavementCaseDeleteArgs} args - Arguments to delete one BereavementCase.
    * @example
@@ -2097,36 +2023,6 @@ export interface BereavementCaseDelegate<ExtArgs extends runtime.Types.Extension
    * 
    */
   updateMany<T extends BereavementCaseUpdateManyArgs>(args: Prisma.SelectSubset<T, BereavementCaseUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more BereavementCases and returns the data updated in the database.
-   * @param {BereavementCaseUpdateManyAndReturnArgs} args - Arguments to update many BereavementCases.
-   * @example
-   * // Update many BereavementCases
-   * const bereavementCase = await prisma.bereavementCase.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more BereavementCases and only return the `id`
-   * const bereavementCaseWithIdOnly = await prisma.bereavementCase.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends BereavementCaseUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, BereavementCaseUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BereavementCasePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one BereavementCase.
@@ -2573,28 +2469,7 @@ export type BereavementCaseCreateManyArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many BereavementCases.
    */
   data: Prisma.BereavementCaseCreateManyInput | Prisma.BereavementCaseCreateManyInput[]
-}
-
-/**
- * BereavementCase createManyAndReturn
- */
-export type BereavementCaseCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the BereavementCase
-   */
-  select?: Prisma.BereavementCaseSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the BereavementCase
-   */
-  omit?: Prisma.BereavementCaseOmit<ExtArgs> | null
-  /**
-   * The data used to create many BereavementCases.
-   */
-  data: Prisma.BereavementCaseCreateManyInput | Prisma.BereavementCaseCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.BereavementCaseIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -2639,36 +2514,6 @@ export type BereavementCaseUpdateManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many BereavementCases to update.
    */
   limit?: number
-}
-
-/**
- * BereavementCase updateManyAndReturn
- */
-export type BereavementCaseUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the BereavementCase
-   */
-  select?: Prisma.BereavementCaseSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the BereavementCase
-   */
-  omit?: Prisma.BereavementCaseOmit<ExtArgs> | null
-  /**
-   * The data used to update BereavementCases.
-   */
-  data: Prisma.XOR<Prisma.BereavementCaseUpdateManyMutationInput, Prisma.BereavementCaseUncheckedUpdateManyInput>
-  /**
-   * Filter which BereavementCases to update
-   */
-  where?: Prisma.BereavementCaseWhereInput
-  /**
-   * Limit how many BereavementCases to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.BereavementCaseIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

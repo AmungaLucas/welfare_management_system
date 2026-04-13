@@ -306,6 +306,7 @@ export type ContributionOrderByWithRelationInput = {
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   member?: Prisma.MemberOrderByWithRelationInput
+  _relevance?: Prisma.ContributionOrderByRelevanceInput
 }
 
 export type ContributionWhereUniqueInput = Prisma.AtLeast<{
@@ -490,6 +491,12 @@ export type ContributionOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type ContributionOrderByRelevanceInput = {
+  fields: Prisma.ContributionOrderByRelevanceFieldEnum | Prisma.ContributionOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
+}
+
 export type ContributionMemberIdYearMonthCompoundUniqueInput = {
   memberId: string
   year: number
@@ -643,6 +650,7 @@ export type ContributionCreateOrConnectWithoutMemberInput = {
 
 export type ContributionCreateManyMemberInputEnvelope = {
   data: Prisma.ContributionCreateManyMemberInput | Prisma.ContributionCreateManyMemberInput[]
+  skipDuplicates?: boolean
 }
 
 export type ContributionUpsertWithWhereUniqueWithoutMemberInput = {
@@ -759,39 +767,7 @@ export type ContributionSelect<ExtArgs extends runtime.Types.Extensions.Internal
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["contribution"]>
 
-export type ContributionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  memberId?: boolean
-  year?: boolean
-  month?: boolean
-  amount?: boolean
-  paymentMethod?: boolean
-  mpesaRef?: boolean
-  transactionRef?: boolean
-  status?: boolean
-  paidDate?: boolean
-  recordedBy?: boolean
-  notes?: boolean
-  createdAt?: boolean
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["contribution"]>
 
-export type ContributionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  memberId?: boolean
-  year?: boolean
-  month?: boolean
-  amount?: boolean
-  paymentMethod?: boolean
-  mpesaRef?: boolean
-  transactionRef?: boolean
-  status?: boolean
-  paidDate?: boolean
-  recordedBy?: boolean
-  notes?: boolean
-  createdAt?: boolean
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["contribution"]>
 
 export type ContributionSelectScalar = {
   id?: boolean
@@ -811,12 +787,6 @@ export type ContributionSelectScalar = {
 
 export type ContributionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "year" | "month" | "amount" | "paymentMethod" | "mpesaRef" | "transactionRef" | "status" | "paidDate" | "recordedBy" | "notes" | "createdAt", ExtArgs["result"]["contribution"]>
 export type ContributionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type ContributionIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type ContributionIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }
 
@@ -957,30 +927,6 @@ export interface ContributionDelegate<ExtArgs extends runtime.Types.Extensions.I
   createMany<T extends ContributionCreateManyArgs>(args?: Prisma.SelectSubset<T, ContributionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many Contributions and returns the data saved in the database.
-   * @param {ContributionCreateManyAndReturnArgs} args - Arguments to create many Contributions.
-   * @example
-   * // Create many Contributions
-   * const contribution = await prisma.contribution.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many Contributions and only return the `id`
-   * const contributionWithIdOnly = await prisma.contribution.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends ContributionCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, ContributionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContributionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a Contribution.
    * @param {ContributionDeleteArgs} args - Arguments to delete one Contribution.
    * @example
@@ -1043,36 +989,6 @@ export interface ContributionDelegate<ExtArgs extends runtime.Types.Extensions.I
    * 
    */
   updateMany<T extends ContributionUpdateManyArgs>(args: Prisma.SelectSubset<T, ContributionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more Contributions and returns the data updated in the database.
-   * @param {ContributionUpdateManyAndReturnArgs} args - Arguments to update many Contributions.
-   * @example
-   * // Update many Contributions
-   * const contribution = await prisma.contribution.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more Contributions and only return the `id`
-   * const contributionWithIdOnly = await prisma.contribution.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends ContributionUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, ContributionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContributionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Contribution.
@@ -1505,28 +1421,7 @@ export type ContributionCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many Contributions.
    */
   data: Prisma.ContributionCreateManyInput | Prisma.ContributionCreateManyInput[]
-}
-
-/**
- * Contribution createManyAndReturn
- */
-export type ContributionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Contribution
-   */
-  select?: Prisma.ContributionSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Contribution
-   */
-  omit?: Prisma.ContributionOmit<ExtArgs> | null
-  /**
-   * The data used to create many Contributions.
-   */
-  data: Prisma.ContributionCreateManyInput | Prisma.ContributionCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ContributionIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1571,36 +1466,6 @@ export type ContributionUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * Limit how many Contributions to update.
    */
   limit?: number
-}
-
-/**
- * Contribution updateManyAndReturn
- */
-export type ContributionUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Contribution
-   */
-  select?: Prisma.ContributionSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Contribution
-   */
-  omit?: Prisma.ContributionOmit<ExtArgs> | null
-  /**
-   * The data used to update Contributions.
-   */
-  data: Prisma.XOR<Prisma.ContributionUpdateManyMutationInput, Prisma.ContributionUncheckedUpdateManyInput>
-  /**
-   * Filter which Contributions to update
-   */
-  where?: Prisma.ContributionWhereInput
-  /**
-   * Limit how many Contributions to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ContributionIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

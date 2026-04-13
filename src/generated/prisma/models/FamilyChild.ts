@@ -201,6 +201,7 @@ export type FamilyChildOrderByWithRelationInput = {
   isAlive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   member?: Prisma.MemberOrderByWithRelationInput
+  _relevance?: Prisma.FamilyChildOrderByRelevanceInput
 }
 
 export type FamilyChildWhereUniqueInput = Prisma.AtLeast<{
@@ -312,6 +313,12 @@ export type FamilyChildOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type FamilyChildOrderByRelevanceInput = {
+  fields: Prisma.FamilyChildOrderByRelevanceFieldEnum | Prisma.FamilyChildOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
+}
+
 export type FamilyChildCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   memberId?: Prisma.SortOrder
@@ -404,6 +411,7 @@ export type FamilyChildCreateOrConnectWithoutMemberInput = {
 
 export type FamilyChildCreateManyMemberInputEnvelope = {
   data: Prisma.FamilyChildCreateManyMemberInput | Prisma.FamilyChildCreateManyMemberInput[]
+  skipDuplicates?: boolean
 }
 
 export type FamilyChildUpsertWithWhereUniqueWithoutMemberInput = {
@@ -478,25 +486,7 @@ export type FamilyChildSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["familyChild"]>
 
-export type FamilyChildSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  memberId?: boolean
-  fullName?: boolean
-  dateOfBirth?: boolean
-  isAlive?: boolean
-  createdAt?: boolean
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["familyChild"]>
 
-export type FamilyChildSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  memberId?: boolean
-  fullName?: boolean
-  dateOfBirth?: boolean
-  isAlive?: boolean
-  createdAt?: boolean
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["familyChild"]>
 
 export type FamilyChildSelectScalar = {
   id?: boolean
@@ -509,12 +499,6 @@ export type FamilyChildSelectScalar = {
 
 export type FamilyChildOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "fullName" | "dateOfBirth" | "isAlive" | "createdAt", ExtArgs["result"]["familyChild"]>
 export type FamilyChildInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type FamilyChildIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type FamilyChildIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }
 
@@ -648,30 +632,6 @@ export interface FamilyChildDelegate<ExtArgs extends runtime.Types.Extensions.In
   createMany<T extends FamilyChildCreateManyArgs>(args?: Prisma.SelectSubset<T, FamilyChildCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many FamilyChildren and returns the data saved in the database.
-   * @param {FamilyChildCreateManyAndReturnArgs} args - Arguments to create many FamilyChildren.
-   * @example
-   * // Create many FamilyChildren
-   * const familyChild = await prisma.familyChild.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many FamilyChildren and only return the `id`
-   * const familyChildWithIdOnly = await prisma.familyChild.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends FamilyChildCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, FamilyChildCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamilyChildPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a FamilyChild.
    * @param {FamilyChildDeleteArgs} args - Arguments to delete one FamilyChild.
    * @example
@@ -734,36 +694,6 @@ export interface FamilyChildDelegate<ExtArgs extends runtime.Types.Extensions.In
    * 
    */
   updateMany<T extends FamilyChildUpdateManyArgs>(args: Prisma.SelectSubset<T, FamilyChildUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more FamilyChildren and returns the data updated in the database.
-   * @param {FamilyChildUpdateManyAndReturnArgs} args - Arguments to update many FamilyChildren.
-   * @example
-   * // Update many FamilyChildren
-   * const familyChild = await prisma.familyChild.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more FamilyChildren and only return the `id`
-   * const familyChildWithIdOnly = await prisma.familyChild.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends FamilyChildUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, FamilyChildUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamilyChildPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one FamilyChild.
@@ -1189,28 +1119,7 @@ export type FamilyChildCreateManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * The data used to create many FamilyChildren.
    */
   data: Prisma.FamilyChildCreateManyInput | Prisma.FamilyChildCreateManyInput[]
-}
-
-/**
- * FamilyChild createManyAndReturn
- */
-export type FamilyChildCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the FamilyChild
-   */
-  select?: Prisma.FamilyChildSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the FamilyChild
-   */
-  omit?: Prisma.FamilyChildOmit<ExtArgs> | null
-  /**
-   * The data used to create many FamilyChildren.
-   */
-  data: Prisma.FamilyChildCreateManyInput | Prisma.FamilyChildCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.FamilyChildIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1255,36 +1164,6 @@ export type FamilyChildUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many FamilyChildren to update.
    */
   limit?: number
-}
-
-/**
- * FamilyChild updateManyAndReturn
- */
-export type FamilyChildUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the FamilyChild
-   */
-  select?: Prisma.FamilyChildSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the FamilyChild
-   */
-  omit?: Prisma.FamilyChildOmit<ExtArgs> | null
-  /**
-   * The data used to update FamilyChildren.
-   */
-  data: Prisma.XOR<Prisma.FamilyChildUpdateManyMutationInput, Prisma.FamilyChildUncheckedUpdateManyInput>
-  /**
-   * Filter which FamilyChildren to update
-   */
-  where?: Prisma.FamilyChildWhereInput
-  /**
-   * Limit how many FamilyChildren to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.FamilyChildIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

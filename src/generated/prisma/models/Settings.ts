@@ -405,6 +405,7 @@ export type SettingsOrderByWithRelationInput = {
   removalThreshold?: Prisma.SortOrder
   maxBurialAttendees?: Prisma.SortOrder
   newChurchMemberYears?: Prisma.SortOrder
+  _relevance?: Prisma.SettingsOrderByRelevanceInput
 }
 
 export type SettingsWhereUniqueInput = Prisma.AtLeast<{
@@ -628,6 +629,12 @@ export type SettingsUncheckedUpdateManyInput = {
   newChurchMemberYears?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
+export type SettingsOrderByRelevanceInput = {
+  fields: Prisma.SettingsOrderByRelevanceFieldEnum | Prisma.SettingsOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
+}
+
 export type SettingsCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   monthlyContributionAmount?: Prisma.SortOrder
@@ -754,47 +761,7 @@ export type SettingsSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   newChurchMemberYears?: boolean
 }, ExtArgs["result"]["settings"]>
 
-export type SettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  monthlyContributionAmount?: boolean
-  registrationFee?: boolean
-  annualRenewalFee?: boolean
-  joiningFeeNewMember?: boolean
-  joiningFeeOldMember?: boolean
-  nuclearBenefitAmount?: boolean
-  parentBenefitAmount?: boolean
-  nuclearContributionPerMember?: boolean
-  parentContributionPerMember?: boolean
-  childCoverageMaxAge?: boolean
-  waitingPeriodMonths?: boolean
-  redAlertThreshold?: boolean
-  suspensionThreshold?: boolean
-  suspensionDurationMonths?: boolean
-  removalThreshold?: boolean
-  maxBurialAttendees?: boolean
-  newChurchMemberYears?: boolean
-}, ExtArgs["result"]["settings"]>
 
-export type SettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  monthlyContributionAmount?: boolean
-  registrationFee?: boolean
-  annualRenewalFee?: boolean
-  joiningFeeNewMember?: boolean
-  joiningFeeOldMember?: boolean
-  nuclearBenefitAmount?: boolean
-  parentBenefitAmount?: boolean
-  nuclearContributionPerMember?: boolean
-  parentContributionPerMember?: boolean
-  childCoverageMaxAge?: boolean
-  waitingPeriodMonths?: boolean
-  redAlertThreshold?: boolean
-  suspensionThreshold?: boolean
-  suspensionDurationMonths?: boolean
-  removalThreshold?: boolean
-  maxBurialAttendees?: boolean
-  newChurchMemberYears?: boolean
-}, ExtArgs["result"]["settings"]>
 
 export type SettingsSelectScalar = {
   id?: boolean
@@ -959,30 +926,6 @@ export interface SettingsDelegate<ExtArgs extends runtime.Types.Extensions.Inter
   createMany<T extends SettingsCreateManyArgs>(args?: Prisma.SelectSubset<T, SettingsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many Settings and returns the data saved in the database.
-   * @param {SettingsCreateManyAndReturnArgs} args - Arguments to create many Settings.
-   * @example
-   * // Create many Settings
-   * const settings = await prisma.settings.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many Settings and only return the `id`
-   * const settingsWithIdOnly = await prisma.settings.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends SettingsCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, SettingsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SettingsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a Settings.
    * @param {SettingsDeleteArgs} args - Arguments to delete one Settings.
    * @example
@@ -1045,36 +988,6 @@ export interface SettingsDelegate<ExtArgs extends runtime.Types.Extensions.Inter
    * 
    */
   updateMany<T extends SettingsUpdateManyArgs>(args: Prisma.SelectSubset<T, SettingsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more Settings and returns the data updated in the database.
-   * @param {SettingsUpdateManyAndReturnArgs} args - Arguments to update many Settings.
-   * @example
-   * // Update many Settings
-   * const settings = await prisma.settings.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more Settings and only return the `id`
-   * const settingsWithIdOnly = await prisma.settings.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends SettingsUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, SettingsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SettingsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one Settings.
@@ -1487,24 +1400,7 @@ export type SettingsCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * The data used to create many Settings.
    */
   data: Prisma.SettingsCreateManyInput | Prisma.SettingsCreateManyInput[]
-}
-
-/**
- * Settings createManyAndReturn
- */
-export type SettingsCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Settings
-   */
-  select?: Prisma.SettingsSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Settings
-   */
-  omit?: Prisma.SettingsOmit<ExtArgs> | null
-  /**
-   * The data used to create many Settings.
-   */
-  data: Prisma.SettingsCreateManyInput | Prisma.SettingsCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1533,32 +1429,6 @@ export type SettingsUpdateArgs<ExtArgs extends runtime.Types.Extensions.Internal
  * Settings updateMany
  */
 export type SettingsUpdateManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * The data used to update Settings.
-   */
-  data: Prisma.XOR<Prisma.SettingsUpdateManyMutationInput, Prisma.SettingsUncheckedUpdateManyInput>
-  /**
-   * Filter which Settings to update
-   */
-  where?: Prisma.SettingsWhereInput
-  /**
-   * Limit how many Settings to update.
-   */
-  limit?: number
-}
-
-/**
- * Settings updateManyAndReturn
- */
-export type SettingsUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the Settings
-   */
-  select?: Prisma.SettingsSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the Settings
-   */
-  omit?: Prisma.SettingsOmit<ExtArgs> | null
   /**
    * The data used to update Settings.
    */

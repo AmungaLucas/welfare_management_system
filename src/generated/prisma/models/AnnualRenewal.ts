@@ -284,6 +284,7 @@ export type AnnualRenewalOrderByWithRelationInput = {
   initiatedBy?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   member?: Prisma.MemberOrderByWithRelationInput
+  _relevance?: Prisma.AnnualRenewalOrderByRelevanceInput
 }
 
 export type AnnualRenewalWhereUniqueInput = Prisma.AtLeast<{
@@ -448,6 +449,12 @@ export type AnnualRenewalOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
+export type AnnualRenewalOrderByRelevanceInput = {
+  fields: Prisma.AnnualRenewalOrderByRelevanceFieldEnum | Prisma.AnnualRenewalOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
+}
+
 export type AnnualRenewalMemberIdYearCompoundUniqueInput = {
   memberId: string
   year: number
@@ -588,6 +595,7 @@ export type AnnualRenewalCreateOrConnectWithoutMemberInput = {
 
 export type AnnualRenewalCreateManyMemberInputEnvelope = {
   data: Prisma.AnnualRenewalCreateManyMemberInput | Prisma.AnnualRenewalCreateManyMemberInput[]
+  skipDuplicates?: boolean
 }
 
 export type AnnualRenewalUpsertWithWhereUniqueWithoutMemberInput = {
@@ -692,35 +700,7 @@ export type AnnualRenewalSelect<ExtArgs extends runtime.Types.Extensions.Interna
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["annualRenewal"]>
 
-export type AnnualRenewalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  memberId?: boolean
-  year?: boolean
-  amount?: boolean
-  status?: boolean
-  dueDate?: boolean
-  paidDate?: boolean
-  paymentMethod?: boolean
-  mpesaRef?: boolean
-  initiatedBy?: boolean
-  createdAt?: boolean
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["annualRenewal"]>
 
-export type AnnualRenewalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  memberId?: boolean
-  year?: boolean
-  amount?: boolean
-  status?: boolean
-  dueDate?: boolean
-  paidDate?: boolean
-  paymentMethod?: boolean
-  mpesaRef?: boolean
-  initiatedBy?: boolean
-  createdAt?: boolean
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["annualRenewal"]>
 
 export type AnnualRenewalSelectScalar = {
   id?: boolean
@@ -738,12 +718,6 @@ export type AnnualRenewalSelectScalar = {
 
 export type AnnualRenewalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "memberId" | "year" | "amount" | "status" | "dueDate" | "paidDate" | "paymentMethod" | "mpesaRef" | "initiatedBy" | "createdAt", ExtArgs["result"]["annualRenewal"]>
 export type AnnualRenewalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type AnnualRenewalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type AnnualRenewalIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }
 
@@ -882,30 +856,6 @@ export interface AnnualRenewalDelegate<ExtArgs extends runtime.Types.Extensions.
   createMany<T extends AnnualRenewalCreateManyArgs>(args?: Prisma.SelectSubset<T, AnnualRenewalCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many AnnualRenewals and returns the data saved in the database.
-   * @param {AnnualRenewalCreateManyAndReturnArgs} args - Arguments to create many AnnualRenewals.
-   * @example
-   * // Create many AnnualRenewals
-   * const annualRenewal = await prisma.annualRenewal.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many AnnualRenewals and only return the `id`
-   * const annualRenewalWithIdOnly = await prisma.annualRenewal.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends AnnualRenewalCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, AnnualRenewalCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnualRenewalPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a AnnualRenewal.
    * @param {AnnualRenewalDeleteArgs} args - Arguments to delete one AnnualRenewal.
    * @example
@@ -968,36 +918,6 @@ export interface AnnualRenewalDelegate<ExtArgs extends runtime.Types.Extensions.
    * 
    */
   updateMany<T extends AnnualRenewalUpdateManyArgs>(args: Prisma.SelectSubset<T, AnnualRenewalUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more AnnualRenewals and returns the data updated in the database.
-   * @param {AnnualRenewalUpdateManyAndReturnArgs} args - Arguments to update many AnnualRenewals.
-   * @example
-   * // Update many AnnualRenewals
-   * const annualRenewal = await prisma.annualRenewal.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more AnnualRenewals and only return the `id`
-   * const annualRenewalWithIdOnly = await prisma.annualRenewal.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends AnnualRenewalUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, AnnualRenewalUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AnnualRenewalPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one AnnualRenewal.
@@ -1428,28 +1348,7 @@ export type AnnualRenewalCreateManyArgs<ExtArgs extends runtime.Types.Extensions
    * The data used to create many AnnualRenewals.
    */
   data: Prisma.AnnualRenewalCreateManyInput | Prisma.AnnualRenewalCreateManyInput[]
-}
-
-/**
- * AnnualRenewal createManyAndReturn
- */
-export type AnnualRenewalCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AnnualRenewal
-   */
-  select?: Prisma.AnnualRenewalSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the AnnualRenewal
-   */
-  omit?: Prisma.AnnualRenewalOmit<ExtArgs> | null
-  /**
-   * The data used to create many AnnualRenewals.
-   */
-  data: Prisma.AnnualRenewalCreateManyInput | Prisma.AnnualRenewalCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnnualRenewalIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1494,36 +1393,6 @@ export type AnnualRenewalUpdateManyArgs<ExtArgs extends runtime.Types.Extensions
    * Limit how many AnnualRenewals to update.
    */
   limit?: number
-}
-
-/**
- * AnnualRenewal updateManyAndReturn
- */
-export type AnnualRenewalUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the AnnualRenewal
-   */
-  select?: Prisma.AnnualRenewalSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the AnnualRenewal
-   */
-  omit?: Prisma.AnnualRenewalOmit<ExtArgs> | null
-  /**
-   * The data used to update AnnualRenewals.
-   */
-  data: Prisma.XOR<Prisma.AnnualRenewalUpdateManyMutationInput, Prisma.AnnualRenewalUncheckedUpdateManyInput>
-  /**
-   * Filter which AnnualRenewals to update
-   */
-  where?: Prisma.AnnualRenewalWhereInput
-  /**
-   * Limit how many AnnualRenewals to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.AnnualRenewalIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

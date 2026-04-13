@@ -282,6 +282,7 @@ export type BenefitDisbursementOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   case?: Prisma.BereavementCaseOrderByWithRelationInput
   member?: Prisma.MemberOrderByWithRelationInput
+  _relevance?: Prisma.BenefitDisbursementOrderByRelevanceInput
 }
 
 export type BenefitDisbursementWhereUniqueInput = Prisma.AtLeast<{
@@ -450,6 +451,12 @@ export type BenefitDisbursementNullableScalarRelationFilter = {
   isNot?: Prisma.BenefitDisbursementWhereInput | null
 }
 
+export type BenefitDisbursementOrderByRelevanceInput = {
+  fields: Prisma.BenefitDisbursementOrderByRelevanceFieldEnum | Prisma.BenefitDisbursementOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
+}
+
 export type BenefitDisbursementCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   caseId?: Prisma.SortOrder
@@ -607,6 +614,7 @@ export type BenefitDisbursementCreateOrConnectWithoutMemberInput = {
 
 export type BenefitDisbursementCreateManyMemberInputEnvelope = {
   data: Prisma.BenefitDisbursementCreateManyMemberInput | Prisma.BenefitDisbursementCreateManyMemberInput[]
+  skipDuplicates?: boolean
 }
 
 export type BenefitDisbursementUpsertWithWhereUniqueWithoutMemberInput = {
@@ -780,37 +788,7 @@ export type BenefitDisbursementSelect<ExtArgs extends runtime.Types.Extensions.I
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["benefitDisbursement"]>
 
-export type BenefitDisbursementSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  caseId?: boolean
-  memberId?: boolean
-  amount?: boolean
-  disbursementMethod?: boolean
-  referenceNo?: boolean
-  disbursedDate?: boolean
-  receivedByName?: boolean
-  receivedByIdNo?: boolean
-  notes?: boolean
-  createdAt?: boolean
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["benefitDisbursement"]>
 
-export type BenefitDisbursementSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  caseId?: boolean
-  memberId?: boolean
-  amount?: boolean
-  disbursementMethod?: boolean
-  referenceNo?: boolean
-  disbursedDate?: boolean
-  receivedByName?: boolean
-  receivedByIdNo?: boolean
-  notes?: boolean
-  createdAt?: boolean
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["benefitDisbursement"]>
 
 export type BenefitDisbursementSelectScalar = {
   id?: boolean
@@ -828,14 +806,6 @@ export type BenefitDisbursementSelectScalar = {
 
 export type BenefitDisbursementOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "caseId" | "memberId" | "amount" | "disbursementMethod" | "referenceNo" | "disbursedDate" | "receivedByName" | "receivedByIdNo" | "notes" | "createdAt", ExtArgs["result"]["benefitDisbursement"]>
 export type BenefitDisbursementInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type BenefitDisbursementIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type BenefitDisbursementIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }
@@ -976,30 +946,6 @@ export interface BenefitDisbursementDelegate<ExtArgs extends runtime.Types.Exten
   createMany<T extends BenefitDisbursementCreateManyArgs>(args?: Prisma.SelectSubset<T, BenefitDisbursementCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many BenefitDisbursements and returns the data saved in the database.
-   * @param {BenefitDisbursementCreateManyAndReturnArgs} args - Arguments to create many BenefitDisbursements.
-   * @example
-   * // Create many BenefitDisbursements
-   * const benefitDisbursement = await prisma.benefitDisbursement.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many BenefitDisbursements and only return the `id`
-   * const benefitDisbursementWithIdOnly = await prisma.benefitDisbursement.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends BenefitDisbursementCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, BenefitDisbursementCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BenefitDisbursementPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a BenefitDisbursement.
    * @param {BenefitDisbursementDeleteArgs} args - Arguments to delete one BenefitDisbursement.
    * @example
@@ -1062,36 +1008,6 @@ export interface BenefitDisbursementDelegate<ExtArgs extends runtime.Types.Exten
    * 
    */
   updateMany<T extends BenefitDisbursementUpdateManyArgs>(args: Prisma.SelectSubset<T, BenefitDisbursementUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more BenefitDisbursements and returns the data updated in the database.
-   * @param {BenefitDisbursementUpdateManyAndReturnArgs} args - Arguments to update many BenefitDisbursements.
-   * @example
-   * // Update many BenefitDisbursements
-   * const benefitDisbursement = await prisma.benefitDisbursement.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more BenefitDisbursements and only return the `id`
-   * const benefitDisbursementWithIdOnly = await prisma.benefitDisbursement.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends BenefitDisbursementUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, BenefitDisbursementUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BenefitDisbursementPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one BenefitDisbursement.
@@ -1523,28 +1439,7 @@ export type BenefitDisbursementCreateManyArgs<ExtArgs extends runtime.Types.Exte
    * The data used to create many BenefitDisbursements.
    */
   data: Prisma.BenefitDisbursementCreateManyInput | Prisma.BenefitDisbursementCreateManyInput[]
-}
-
-/**
- * BenefitDisbursement createManyAndReturn
- */
-export type BenefitDisbursementCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the BenefitDisbursement
-   */
-  select?: Prisma.BenefitDisbursementSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the BenefitDisbursement
-   */
-  omit?: Prisma.BenefitDisbursementOmit<ExtArgs> | null
-  /**
-   * The data used to create many BenefitDisbursements.
-   */
-  data: Prisma.BenefitDisbursementCreateManyInput | Prisma.BenefitDisbursementCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.BenefitDisbursementIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1589,36 +1484,6 @@ export type BenefitDisbursementUpdateManyArgs<ExtArgs extends runtime.Types.Exte
    * Limit how many BenefitDisbursements to update.
    */
   limit?: number
-}
-
-/**
- * BenefitDisbursement updateManyAndReturn
- */
-export type BenefitDisbursementUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the BenefitDisbursement
-   */
-  select?: Prisma.BenefitDisbursementSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the BenefitDisbursement
-   */
-  omit?: Prisma.BenefitDisbursementOmit<ExtArgs> | null
-  /**
-   * The data used to update BenefitDisbursements.
-   */
-  data: Prisma.XOR<Prisma.BenefitDisbursementUpdateManyMutationInput, Prisma.BenefitDisbursementUncheckedUpdateManyInput>
-  /**
-   * Filter which BenefitDisbursements to update
-   */
-  where?: Prisma.BenefitDisbursementWhereInput
-  /**
-   * Limit how many BenefitDisbursements to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.BenefitDisbursementIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**

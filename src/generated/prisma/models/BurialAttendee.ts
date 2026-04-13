@@ -194,6 +194,7 @@ export type BurialAttendeeOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   case?: Prisma.BereavementCaseOrderByWithRelationInput
   member?: Prisma.MemberOrderByWithRelationInput
+  _relevance?: Prisma.BurialAttendeeOrderByRelevanceInput
 }
 
 export type BurialAttendeeWhereUniqueInput = Prisma.AtLeast<{
@@ -293,6 +294,12 @@ export type BurialAttendeeListRelationFilter = {
 
 export type BurialAttendeeOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type BurialAttendeeOrderByRelevanceInput = {
+  fields: Prisma.BurialAttendeeOrderByRelevanceFieldEnum | Prisma.BurialAttendeeOrderByRelevanceFieldEnum[]
+  sort: Prisma.SortOrder
+  search: string
 }
 
 export type BurialAttendeeCountOrderByAggregateInput = {
@@ -424,6 +431,7 @@ export type BurialAttendeeCreateOrConnectWithoutMemberInput = {
 
 export type BurialAttendeeCreateManyMemberInputEnvelope = {
   data: Prisma.BurialAttendeeCreateManyMemberInput | Prisma.BurialAttendeeCreateManyMemberInput[]
+  skipDuplicates?: boolean
 }
 
 export type BurialAttendeeUpsertWithWhereUniqueWithoutMemberInput = {
@@ -474,6 +482,7 @@ export type BurialAttendeeCreateOrConnectWithoutCaseInput = {
 
 export type BurialAttendeeCreateManyCaseInputEnvelope = {
   data: Prisma.BurialAttendeeCreateManyCaseInput | Prisma.BurialAttendeeCreateManyCaseInput[]
+  skipDuplicates?: boolean
 }
 
 export type BurialAttendeeUpsertWithWhereUniqueWithoutCaseInput = {
@@ -560,25 +569,7 @@ export type BurialAttendeeSelect<ExtArgs extends runtime.Types.Extensions.Intern
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["burialAttendee"]>
 
-export type BurialAttendeeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  caseId?: boolean
-  memberId?: boolean
-  role?: boolean
-  createdAt?: boolean
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["burialAttendee"]>
 
-export type BurialAttendeeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
-  id?: boolean
-  caseId?: boolean
-  memberId?: boolean
-  role?: boolean
-  createdAt?: boolean
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}, ExtArgs["result"]["burialAttendee"]>
 
 export type BurialAttendeeSelectScalar = {
   id?: boolean
@@ -590,14 +581,6 @@ export type BurialAttendeeSelectScalar = {
 
 export type BurialAttendeeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "caseId" | "memberId" | "role" | "createdAt", ExtArgs["result"]["burialAttendee"]>
 export type BurialAttendeeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type BurialAttendeeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
-  member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
-}
-export type BurialAttendeeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   case?: boolean | Prisma.BereavementCaseDefaultArgs<ExtArgs>
   member?: boolean | Prisma.MemberDefaultArgs<ExtArgs>
 }
@@ -732,30 +715,6 @@ export interface BurialAttendeeDelegate<ExtArgs extends runtime.Types.Extensions
   createMany<T extends BurialAttendeeCreateManyArgs>(args?: Prisma.SelectSubset<T, BurialAttendeeCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
 
   /**
-   * Create many BurialAttendees and returns the data saved in the database.
-   * @param {BurialAttendeeCreateManyAndReturnArgs} args - Arguments to create many BurialAttendees.
-   * @example
-   * // Create many BurialAttendees
-   * const burialAttendee = await prisma.burialAttendee.createManyAndReturn({
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Create many BurialAttendees and only return the `id`
-   * const burialAttendeeWithIdOnly = await prisma.burialAttendee.createManyAndReturn({
-   *   select: { id: true },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  createManyAndReturn<T extends BurialAttendeeCreateManyAndReturnArgs>(args?: Prisma.SelectSubset<T, BurialAttendeeCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BurialAttendeePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
-
-  /**
    * Delete a BurialAttendee.
    * @param {BurialAttendeeDeleteArgs} args - Arguments to delete one BurialAttendee.
    * @example
@@ -818,36 +777,6 @@ export interface BurialAttendeeDelegate<ExtArgs extends runtime.Types.Extensions
    * 
    */
   updateMany<T extends BurialAttendeeUpdateManyArgs>(args: Prisma.SelectSubset<T, BurialAttendeeUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<Prisma.BatchPayload>
-
-  /**
-   * Update zero or more BurialAttendees and returns the data updated in the database.
-   * @param {BurialAttendeeUpdateManyAndReturnArgs} args - Arguments to update many BurialAttendees.
-   * @example
-   * // Update many BurialAttendees
-   * const burialAttendee = await prisma.burialAttendee.updateManyAndReturn({
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * 
-   * // Update zero or more BurialAttendees and only return the `id`
-   * const burialAttendeeWithIdOnly = await prisma.burialAttendee.updateManyAndReturn({
-   *   select: { id: true },
-   *   where: {
-   *     // ... provide filter here
-   *   },
-   *   data: [
-   *     // ... provide data here
-   *   ]
-   * })
-   * Note, that providing `undefined` is treated as the value not being there.
-   * Read more here: https://pris.ly/d/null-undefined
-   * 
-   */
-  updateManyAndReturn<T extends BurialAttendeeUpdateManyAndReturnArgs>(args: Prisma.SelectSubset<T, BurialAttendeeUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BurialAttendeePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
   /**
    * Create or update one BurialAttendee.
@@ -1273,28 +1202,7 @@ export type BurialAttendeeCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many BurialAttendees.
    */
   data: Prisma.BurialAttendeeCreateManyInput | Prisma.BurialAttendeeCreateManyInput[]
-}
-
-/**
- * BurialAttendee createManyAndReturn
- */
-export type BurialAttendeeCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the BurialAttendee
-   */
-  select?: Prisma.BurialAttendeeSelectCreateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the BurialAttendee
-   */
-  omit?: Prisma.BurialAttendeeOmit<ExtArgs> | null
-  /**
-   * The data used to create many BurialAttendees.
-   */
-  data: Prisma.BurialAttendeeCreateManyInput | Prisma.BurialAttendeeCreateManyInput[]
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.BurialAttendeeIncludeCreateManyAndReturn<ExtArgs> | null
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1339,36 +1247,6 @@ export type BurialAttendeeUpdateManyArgs<ExtArgs extends runtime.Types.Extension
    * Limit how many BurialAttendees to update.
    */
   limit?: number
-}
-
-/**
- * BurialAttendee updateManyAndReturn
- */
-export type BurialAttendeeUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the BurialAttendee
-   */
-  select?: Prisma.BurialAttendeeSelectUpdateManyAndReturn<ExtArgs> | null
-  /**
-   * Omit specific fields from the BurialAttendee
-   */
-  omit?: Prisma.BurialAttendeeOmit<ExtArgs> | null
-  /**
-   * The data used to update BurialAttendees.
-   */
-  data: Prisma.XOR<Prisma.BurialAttendeeUpdateManyMutationInput, Prisma.BurialAttendeeUncheckedUpdateManyInput>
-  /**
-   * Filter which BurialAttendees to update
-   */
-  where?: Prisma.BurialAttendeeWhereInput
-  /**
-   * Limit how many BurialAttendees to update.
-   */
-  limit?: number
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.BurialAttendeeIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
