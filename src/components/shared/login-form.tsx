@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,23 +15,21 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+  const { login, loginMember } = useAuth();
   const [email, setEmail] = useState('admin@welfare.com');
   const [password, setPassword] = useState('admin123');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    });
+    const result = await login(email, password);
     setLoading(false);
-    if (result?.error) {
-      toast.error('Login failed', { description: result.error });
-    } else {
+    if (result.ok) {
       toast.success('Welcome back!');
+    } else {
+      toast.error('Login failed', { description: result.error });
     }
   };
 
@@ -45,16 +43,12 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       return;
     }
     setLoading(true);
-    const result = await signIn('credentials', {
-      churchMembershipNo: churchNo,
-      phone,
-      redirect: false,
-    });
+    const result = await loginMember(churchNo, phone);
     setLoading(false);
-    if (result?.error) {
-      toast.error('Login failed', { description: 'Invalid membership number or phone' });
-    } else {
+    if (result.ok) {
       toast.success('Welcome back!');
+    } else {
+      toast.error('Login failed', { description: result.error });
     }
   };
 

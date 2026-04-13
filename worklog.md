@@ -81,3 +81,38 @@ Stage Summary:
 - HTTP 200 confirmed, lint passes with 0 errors 0 warnings
 - Login: admin@welfare.com / admin123 | Member: ACK/UTW/BTH/001 + 0711000001 / member123
 - 9 districts, 5 sample members, 6 months contributions seeded
+
+---
+Task ID: 5
+Agent: Main Agent
+Task: Fix authentication stuck at "Authenticating..." and admin 401 errors
+
+Work Log:
+- Diagnosed root cause: `next-auth@4.24.13` `useSession`/`signIn` hooks are broken with Next.js 16 (stuck in 'loading' state forever)
+- Server-side auth confirmed working via curl (login returns session cookie, /api/auth/session returns valid session, POST /api/members succeeds)
+- Created custom `AuthContext` + `useAuth` hook in `src/contexts/auth-context.tsx` that:
+  - Uses `useSyncExternalStore` for session state (React 19 compliant, no setState-in-effect)
+  - Implements direct `fetch`-based login (with CSRF token) and logout
+  - Fetches session from `/api/auth/session` on mount and window focus
+  - Provides `login()`, `loginMember()`, `logout()`, `refresh()` functions
+- Updated 10 files to replace `useSession`/`signIn`/`signOut` from `next-auth/react` with `useAuth()`:
+  - src/components/providers.tsx (added AuthProvider)
+  - src/app/page.tsx
+  - src/components/shared/login-form.tsx
+  - src/components/layout/header.tsx
+  - src/components/admin/overview.tsx
+  - src/components/member/member-overview.tsx
+  - src/components/member/member-profile.tsx
+  - src/components/member/member-cases.tsx
+  - src/components/member/member-renewals.tsx
+  - src/components/member/member-contributions.tsx
+- Verified full flow via curl: CSRF → Login (302) → Session (ADMIN) → Add Member (201)
+- Lint passes clean (0 errors, 0 warnings)
+- Cleaned up test data from database
+
+Stage Summary:
+- Authentication fully fixed with custom React 19-compatible auth system
+- Admin can now log in, see dashboard, and add members
+- All next-auth/react hooks replaced with custom useAuth hook
+- Session management via useSyncExternalStore (no lint violations)
+- Files changed: 11 (1 new, 10 modified)

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/auth-context';
 import { LoginForm } from '@/components/shared/login-form';
 import { RegisterForm } from '@/components/shared/register-form';
 import { LoadingScreen } from '@/components/shared/loading';
@@ -33,7 +33,7 @@ const ADMIN_DEFAULT: View = 'overview';
 const MEMBER_DEFAULT: View = 'member-overview';
 
 export default function Home() {
-  const { data: session, status } = useSession();
+  const { session, status } = useAuth();
   // Track user navigation separately from default view
   const [userView, setUserView] = useState<View | null>(null);
 

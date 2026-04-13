@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,7 +25,7 @@ interface CaseContribution {
 }
 
 export function MemberCases() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const memberId = session?.user?.memberId;
   const [cases, setCases] = useState<CaseContribution[]>([]);
   const [loading, setLoading] = useState(true);

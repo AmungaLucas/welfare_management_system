@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,7 +14,7 @@ import { User, Save, Phone, MapPin, Users } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function MemberProfile() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const memberId = session?.user?.memberId;
   const [profile, setProfile] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(true);

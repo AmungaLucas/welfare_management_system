@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,7 @@ interface MemberStats {
 }
 
 export function MemberOverview() {
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const [stats, setStats] = useState<MemberStats | null>(null);
   const [loading, setLoading] = useState(true);
 

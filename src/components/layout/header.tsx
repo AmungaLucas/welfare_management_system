@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/contexts/auth-context';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -27,7 +27,7 @@ interface HeaderProps {
 }
 
 export function Header({ onMobileViewChange, activeView }: HeaderProps) {
-  const { data: session } = useSession();
+  const { session, logout } = useAuth();
   const role = session?.user?.role === 'ADMIN' ? 'ADMIN' : 'MEMBER';
   const items = role === 'ADMIN' ? adminNav : memberNav;
 
@@ -109,7 +109,7 @@ export function Header({ onMobileViewChange, activeView }: HeaderProps) {
               </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })}>
+            <DropdownMenuItem onClick={() => logout()}>
               <LogOut className="h-4 w-4 mr-2" />
               Sign Out
             </DropdownMenuItem>

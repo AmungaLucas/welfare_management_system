@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { StatCard } from '@/components/shared/stat-card';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/auth-context';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -37,7 +37,7 @@ interface ChartData {
 
 export function AdminOverview() {
    
-  const { data: session } = useSession();
+  const { session } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [charts, setCharts] = useState<ChartData | null>(null);
   const [loading, setLoading] = useState(true);
