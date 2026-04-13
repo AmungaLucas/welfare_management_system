@@ -25,6 +25,43 @@ export async function GET(
         district: true,
         user: { select: { id: true, email: true, isActive: true } },
         children: true,
+        contributions: {
+          orderBy: { paidDate: 'desc' },
+          take: 20,
+        },
+        caseContributions: {
+          include: {
+            case: {
+              select: {
+                id: true,
+                deceasedName: true,
+                deceasedRelationship: true,
+                status: true,
+                createdAt: true,
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 20,
+        },
+        annualRenewals: {
+          orderBy: { year: 'desc' },
+          take: 5,
+        },
+        walletTransactions: {
+          orderBy: { createdAt: 'desc' },
+          take: 10,
+        },
+        bereavementCases: {
+          where: { memberEligible: true },
+          include: {
+            caseContributions: {
+              where: { status: 'PAID' },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+        },
       },
     });
 

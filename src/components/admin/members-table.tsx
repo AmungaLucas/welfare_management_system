@@ -18,8 +18,9 @@ import {
 } from '@/components/ui/table';
 import {
   Search, Plus, CheckCircle, XCircle, Ban, Trash2, Upload, Edit, ChevronLeft, ChevronRight,
-  UserPlus, Loader2, Church, Users, Phone, Mail, Heart, Shield,
+  UserPlus, Loader2, Church, Users, Phone, Mail, Heart, Shield, Eye,
 } from 'lucide-react';
+import { MemberDetailDialog } from './member-detail-dialog';
 import { toast } from 'sonner';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
@@ -111,6 +112,7 @@ export function MembersTable() {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [viewMemberId, setViewMemberId] = useState<string | null>(null);
 
   // Fetch districts from the database (not hardcoded)
   useEffect(() => {
@@ -349,6 +351,10 @@ export function MembersTable() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex gap-1 justify-end">
+                          <Button size="sm" variant="ghost" className="h-7 px-2 text-navy-700"
+                            onClick={() => setViewMemberId(m.id)}>
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
                           {m.status === 'PENDING_APPROVAL' && (
                             <Button size="sm" variant="ghost" className="h-7 px-2 text-emerald-600"
                               onClick={() => handleStatusChange(m.id, 'ACTIVE')}>
@@ -621,6 +627,12 @@ export function MembersTable() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <MemberDetailDialog
+        memberId={viewMemberId}
+        open={!!viewMemberId}
+        onClose={() => setViewMemberId(null)}
+      />
     </div>
   );
 }
