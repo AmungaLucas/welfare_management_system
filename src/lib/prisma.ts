@@ -3,10 +3,13 @@ import { resolve } from 'path';
 import { PrismaClient } from '@prisma/client';
 
 /**
- * Force-read DATABASE_URL from the .env file to avoid
+ * Force-read DATABASE_URL from the local .env file to avoid
  * system-level env var overrides (e.g. a SQLite path set globally).
+ * On Vercel, the .env file doesn't exist, so it falls back to
+ * process.env.DATABASE_URL which is injected by Vercel's env settings.
  */
-function loadDbUrlFromDotEnv(): string {
+function loadDatabaseUrl(): string {
+  // First try: read from .env file (local development)
   try {
     const envPath = resolve(process.cwd(), '.env');
     const content = readFileSync(envPath, 'utf8');
@@ -14,18 +17,24 @@ function loadDbUrlFromDotEnv(): string {
       const trimmed = line.trim();
       if (trimmed.startsWith('DATABASE_URL=')) {
         let val = trimmed.substring('DATABASE_URL='.length).trim();
-        if (val.startsWith('"') && val.endsWith('"')) val = val.slice(1, -1);
-        if (val.startsWith("'") && val.endsWith("'")) val = val.slice(1, -1);
-        return val;
+        // Strip surrounding quotes
+        if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+          val = val.slice(1, -1);
+        }
+        if (val.length > 0) {
+          return val;
+        }
       }
     }
   } catch {
-    // .env not found – fall through to process.env
+    // .env file not found (expected on Vercel) — fall through
   }
+
+  // Fallback: use process.env (Vercel injects env vars this way)
   return process.env.DATABASE_URL ?? '';
 }
 
-const dbUrl = loadDbUrlFromDotEnv();
+const databaseUrl = loadDatabaseUrl();
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -35,9 +44,12 @@ function createPrismaClient() {
   return new PrismaClient({
     datasources: {
       db: {
-        url: dbUrl,
+        url: databaseUrl,
       },
     },
+    log: process.env.NODE_ENV === 'development'
+      ? ['warn', 'error']
+      : ['error'],
   });
 }
 
