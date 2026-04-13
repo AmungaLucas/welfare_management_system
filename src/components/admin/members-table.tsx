@@ -27,7 +27,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 interface Member {
   id: string;
   churchMembershipNo: string;
-  welfareNo: number | null;
   firstName: string;
   lastName: string;
   otherNames: string | null;
@@ -237,7 +236,7 @@ export function MembersTable() {
       if (res.ok) {
         const m = data.member;
         toast.success(`Member "${m.firstName} ${m.lastName}" added successfully!`, {
-          description: `Welfare No: ${m.welfareNo} | Status: ${m.status.replace(/_/g, ' ')}`,
+          description: `Church Reg: ${m.churchMembershipNo} | Status: ${m.status.replace(/_/g, ' ')}`,
         });
         setShowAddDialog(false);
         resetForm();

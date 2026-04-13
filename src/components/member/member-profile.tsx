@@ -87,7 +87,6 @@ export function MemberProfile() {
               <div className="min-w-0">
                 <h2 className="text-lg font-bold truncate">{fullName}</h2>
                 <div className="flex items-center gap-2 mt-1 flex-wrap">
-                  <span className="text-xs font-mono text-muted-foreground">SMW-{String(profile.welfareNo || '---').padStart(3, '0')}</span>
                   <span className="text-xs text-muted-foreground">{String(profile.churchMembershipNo)}</span>
                 </div>
               </div>
@@ -182,10 +181,6 @@ export function MemberProfile() {
           <div className="flex items-center justify-between py-1">
             <span className="text-xs text-muted-foreground">Membership No.</span>
             <span className="text-xs font-mono font-medium">{String(profile.churchMembershipNo)}</span>
-          </div>
-          <div className="flex items-center justify-between py-1">
-            <span className="text-xs text-muted-foreground">Welfare No.</span>
-            <span className="text-xs font-mono font-medium">SMW-{String(profile.welfareNo || '---').padStart(3, '0')}</span>
           </div>
           <div className="flex items-center justify-between py-1">
             <span className="text-xs text-muted-foreground">District</span>

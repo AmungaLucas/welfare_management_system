@@ -66,11 +66,6 @@ export async function POST(req: NextRequest) {
           continue;
         }
 
-        const lastMember = await prisma.member.findFirst({
-          orderBy: { welfareNo: 'desc' }, select: { welfareNo: true },
-        });
-        const welfareNo = (lastMember?.welfareNo || 0) + 1;
-
         const email = row.email || `${row.church_membership_no.toLowerCase().replace(/[/\s]/g, '_')}@welfare.local`;
         const passwordHash = await bcrypt.hash('member123', 10);
 
@@ -82,7 +77,6 @@ export async function POST(req: NextRequest) {
           data: {
             userId: user.id,
             churchMembershipNo: row.church_membership_no,
-            welfareNo,
             firstName: row.first_name,
             lastName: row.last_name,
             otherNames: row.other_names || null,

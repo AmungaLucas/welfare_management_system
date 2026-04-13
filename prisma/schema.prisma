@@ -51,7 +51,6 @@ model Member {
   id                      String          @id @default(cuid())
   userId                  String?         @unique
   churchMembershipNo      String          @unique @map("church_membership_no") 
-  welfareNo               Int?            @unique @map("welfare_no")
   firstName                String          @map("first_name") 
   lastName                 String          @map("last_name") 
   otherNames               String?         @map("other_names") 

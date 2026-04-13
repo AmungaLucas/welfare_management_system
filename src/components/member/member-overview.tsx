@@ -22,7 +22,6 @@ interface MemberStats {
     firstName: string;
     lastName: string;
     churchMembershipNo: string;
-    welfareNo: number | null;
     churchDurationYears: number | null;
     dateJoinedWelfare: string | null;
     registrationFeePaid: number;
@@ -214,8 +213,8 @@ export function MemberOverview() {
           <CardContent className="space-y-2.5">
             <div className="flex items-center gap-3">
               <Hash className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-              <span className="text-xs text-muted-foreground w-28 shrink-0">Welfare No.</span>
-              <span className="text-sm font-mono font-medium">{m.welfareNo ? `SMW-${String(m.welfareNo).padStart(3, '0')}` : '—'}</span>
+              <span className="text-xs text-muted-foreground w-28 shrink-0">Church Reg.</span>
+              <span className="text-sm font-mono font-medium">{m.churchMembershipNo}</span>
             </div>
             <div className="flex items-center gap-3">
               <Church className="h-3.5 w-3.5 text-muted-foreground shrink-0" />

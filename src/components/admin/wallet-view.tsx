@@ -35,7 +35,6 @@ interface MemberSearchResult {
   firstName: string;
   lastName: string;
   churchMembershipNo: string;
-  welfareNo: number | null;
   status: string;
   walletBalance: number | string;
 }
@@ -324,7 +323,7 @@ export function WalletView() {
                           <div className="flex items-center justify-between">
                             <span className="font-medium">{m.firstName} {m.lastName}</span>
                             <span className="text-[10px] text-muted-foreground font-mono ml-2 shrink-0">
-                              {m.welfareNo ? `#${m.welfareNo}` : m.churchMembershipNo}
+                              {m.churchMembershipNo}
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground mt-0.5">

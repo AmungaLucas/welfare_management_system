@@ -22,7 +22,7 @@ export async function GET(req: NextRequest) {
       id: user.id, email: user.email, role: user.role, phone: user.phone,
       member: user.member ? {
         id: user.member.id, churchMembershipNo: user.member.churchMembershipNo,
-        welfareNo: user.member.welfareNo, firstName: user.member.firstName, lastName: user.member.lastName,
+        firstName: user.member.firstName, lastName: user.member.lastName,
         phone: user.member.phone, status: user.member.status, district: user.member.district?.name,
         walletBalance: Number(user.member.walletBalance), dateJoinedWelfare: user.member.dateJoinedWelfare,
       } : null,

@@ -111,14 +111,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Get next welfare number
-    const lastMember = await prisma.member.findFirst({
-      orderBy: { welfareNo: 'desc' },
-      select: { welfareNo: true },
-      where: { welfareNo: { not: null } },
-    });
-    const welfareNo = (lastMember?.welfareNo || 0) + 1;
-
     // Compute church membership duration
     let churchDurationYears: number | null = null;
     let isNew = isNewChurchMember === true;
@@ -154,7 +146,6 @@ export async function POST(req: NextRequest) {
       data: {
         userId,
         churchMembershipNo: String(churchMembershipNo),
-        welfareNo,
         firstName: String(firstName),
         lastName: String(lastName),
         otherNames: otherNames ? String(otherNames) : null,

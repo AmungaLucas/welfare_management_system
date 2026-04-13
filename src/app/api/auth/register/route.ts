@@ -38,9 +38,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'District not found' }, { status: 404 });
     }
 
-    const lastMember = await prisma.member.findFirst({ orderBy: { welfareNo: 'desc' }, select: { welfareNo: true } });
-    const welfareNo = (lastMember?.welfareNo || 0) + 1;
-
     const passwordHash = await bcrypt.hash(password, 10);
     const userEmail = email || `${churchMembershipNo.toLowerCase().replace(/[/\s]/g, '_')}@welfare.local`;
 
@@ -60,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     const member = await prisma.member.create({
       data: {
-        userId: user.id, churchMembershipNo, welfareNo, firstName, lastName, phone,
+        userId: user.id, churchMembershipNo, firstName, lastName, phone,
         email: email || null, districtId,
         churchMembershipDate: churchMembershipDate ? new Date(churchMembershipDate) : null,
         churchDurationYears, isNewChurchMember: isNew ?? isNewChurchMember ?? false,
@@ -75,7 +72,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       message: 'Registration successful! Your account is pending admin approval.',
       member: {
-        id: member.id, churchMembershipNo: member.churchMembershipNo, welfareNo: member.welfareNo,
+        id: member.id, churchMembershipNo: member.churchMembershipNo,
         name: `${member.firstName} ${member.lastName}`, status: member.status, district: member.district.name,
       },
     }, { status: 201 });

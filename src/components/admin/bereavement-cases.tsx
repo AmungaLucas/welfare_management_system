@@ -56,7 +56,6 @@ interface MemberOption {
   firstName: string;
   lastName: string;
   churchMembershipNo: string;
-  welfareNo: number | null;
   status: string;
 }
 
@@ -142,7 +141,7 @@ export function BereavementCases() {
   }, []);
 
   const selectMember = (member: MemberOption) => {
-    const label = `${member.firstName} ${member.lastName} — ${member.churchMembershipNo}${member.welfareNo ? ` (#${member.welfareNo})` : ''}`;
+    const label = `${member.firstName} ${member.lastName} — ${member.churchMembershipNo}`;
     setForm((f) => ({ ...f, memberId: member.id, memberLabel: label }));
     setMemberQuery('');
     setShowMemberDropdown(false);
@@ -294,7 +293,7 @@ export function BereavementCases() {
                             <div className="flex items-center justify-between">
                               <span className="font-medium">{m.firstName} {m.lastName}</span>
                               <span className="text-[10px] text-muted-foreground font-mono ml-2 shrink-0">
-                                #{m.welfareNo || '—'}
+                                {m.churchMembershipNo}
                               </span>
                             </div>
                             <div className="text-xs text-muted-foreground mt-0.5">
