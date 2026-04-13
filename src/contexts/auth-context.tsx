@@ -50,15 +50,21 @@ function subscribeToStore(listener: () => void): () => void {
   return () => { storeListeners.delete(listener); };
 }
 
-function getStoreSnapshot(): { session: Session | null; status: AuthStatus } {
-  return { session: storeSession, status: storeStatus };
+/* Cached snapshot objects — mutated in-place only when store changes */
+const clientSnapshot = { session: null as Session | null, status: 'loading' as AuthStatus };
+const serverSnapshot = Object.freeze({ session: null as Session | null, status: 'loading' as AuthStatus });
+
+function getStoreSnapshot() {
+  return clientSnapshot;
 }
 
-function getServerSnapshot(): { session: Session | null; status: AuthStatus } {
-  return { session: null, status: 'loading' };
+function getServerSnapshot() {
+  return serverSnapshot;
 }
 
 function notifyStore() {
+  clientSnapshot.session = storeSession;
+  clientSnapshot.status = storeStatus;
   storeListeners.forEach((l) => l());
 }
 
