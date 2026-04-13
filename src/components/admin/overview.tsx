@@ -44,8 +44,14 @@ export function AdminOverview() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/dashboard/stats').then((r) => r.json()),
-      fetch('/api/dashboard/charts').then((r) => r.json()),
+      fetch('/api/dashboard/stats').then(async (r) => {
+        if (!r.ok) return null;
+        return r.json();
+      }),
+      fetch('/api/dashboard/charts').then(async (r) => {
+        if (!r.ok) return null;
+        return r.json();
+      }),
     ])
       .then(([s, c]) => {
         setStats(s);
@@ -141,8 +147,8 @@ export function AdminOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {charts?.contributionTrends.map((item) => {
-                const maxAmount = Math.max(...(charts?.contributionTrends.map((c) => c.amount) || [1]), 1);
+              {(charts?.contributionTrends || []).map((item) => {
+                const maxAmount = Math.max(...(charts?.contributionTrends || []).map((c) => c.amount), 1);
                 return (
                   <div key={item.month} className="flex items-center gap-3">
                     <span className="w-10 text-xs text-muted-foreground shrink-0">{item.month}</span>
@@ -170,8 +176,8 @@ export function AdminOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {charts?.districtDistribution.map((item) => {
-                const maxCount = Math.max(...(charts?.districtDistribution.map((c) => c.count) || [1]), 1);
+              {(charts?.districtDistribution || []).map((item) => {
+                const maxCount = Math.max(...(charts?.districtDistribution || []).map((c) => c.count), 1);
                 return (
                   <div key={item.district} className="flex items-center gap-3">
                     <span className="w-24 text-xs text-muted-foreground shrink-0 truncate">{item.district}</span>
@@ -221,7 +227,7 @@ export function AdminOverview() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-4">
-              {charts?.casesByCategory.map((item) => (
+              {(charts?.casesByCategory || []).map((item) => (
                 <div key={item.category} className="text-center p-3 rounded-lg bg-muted/50">
                   <p className="text-2xl font-bold text-navy-900">{item.count}</p>
                   <p className="text-xs text-muted-foreground mt-1">
@@ -231,7 +237,7 @@ export function AdminOverview() {
               ))}
             </div>
             <div className="mt-4 space-y-2">
-              {charts?.casesByStatus.map((item) => (
+              {(charts?.casesByStatus || []).map((item) => (
                 <div key={item.status} className="flex items-center justify-between">
                   <span className="text-sm">{item.status.replace(/_/g, ' ')}</span>
                   <Badge variant="outline">{item.count}</Badge>

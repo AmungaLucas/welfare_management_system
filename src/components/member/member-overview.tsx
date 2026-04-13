@@ -34,7 +34,10 @@ export function MemberOverview() {
 
   useEffect(() => {
     fetch('/api/dashboard/stats')
-      .then((r) => r.json())
+      .then(async (r) => {
+        if (!r.ok) return null;
+        return r.json();
+      })
       .then(setStats)
       .catch(() => toast.error('Failed to load'))
       .finally(() => setLoading(false));
