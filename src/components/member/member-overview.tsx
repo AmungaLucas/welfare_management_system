@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { StatCard } from '@/components/shared/stat-card';
-import { Wallet, Calendar, AlertTriangle, Heart, CheckCircle, Clock } from 'lucide-react';
+import { Wallet, Calendar, AlertTriangle, Heart, CheckCircle, Clock, DollarSign, Loader2, CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface MemberStats {
@@ -31,6 +31,7 @@ export function MemberOverview() {
   const { session } = useAuth();
   const [stats, setStats] = useState<MemberStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [payingCase, setPayingCase] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/dashboard/stats')
@@ -48,6 +49,27 @@ export function MemberOverview() {
       <Card key={i} className="animate-pulse"><CardContent className="p-6"><div className="h-20 bg-muted rounded" /></CardContent></Card>
     ))}</div>;
   }
+
+  const handleContribute = async (caseId: string) => {
+    if (payingCase) return;
+    setPayingCase(caseId);
+    try {
+      const res = await fetch(`/api/bereavement/${caseId}/contribute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ useWallet: false }),
+      });
+      if (res.ok) {
+        toast.success('Contribution recorded');
+        // Refresh stats
+        fetch('/api/dashboard/stats').then(async (r) => r.ok ? r.json() : null).then(setStats);
+      } else {
+        const d = await res.json();
+        toast.error(d.error || 'Failed to pay');
+      }
+    } catch { toast.error('Failed'); }
+    finally { setPayingCase(null); }
+  };
 
   if (!stats) return null;
 
@@ -101,17 +123,31 @@ export function MemberOverview() {
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
-              {stats.activeCasesRequiringPayment.map((cc: Record<string, unknown>) => (
-                <div key={String(cc.id)} className="flex items-center justify-between p-3 rounded-lg bg-red-50">
-                  <div>
-                    <p className="text-sm font-medium">{String(cc.case && (cc.case as Record<string, unknown>).deceasedName || '')}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {String(cc.case && (cc.case as Record<string, unknown>).deceasedRelationship || '')} — Ksh {Number(cc.expectedAmount).toLocaleString()} due
-                    </p>
+              {stats.activeCasesRequiringPayment.map((cc: Record<string, unknown>) => {
+                const caseId = String((cc.case as Record<string, unknown>)?.id || '');
+                const isPaying = payingCase === caseId;
+                return (
+                  <div key={String(cc.id)} className="flex items-center justify-between p-3 rounded-lg bg-red-50">
+                    <div className="flex-1 min-w-0 mr-3">
+                      <p className="text-sm font-medium truncate">{String((cc.case as Record<string, unknown>)?.deceasedName || '')}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {String((cc.case as Record<string, unknown>)?.deceasedRelationship || '')} — <span className="font-medium">Ksh {Number(cc.expectedAmount).toLocaleString()}</span> due
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant="destructive" className="text-[10px]">PENDING</Badge>
+                      <Button
+                        size="sm"
+                        className="bg-red-700 hover:bg-red-800 text-white h-7 text-xs"
+                        disabled={isPaying}
+                        onClick={() => handleContribute(caseId)}
+                      >
+                        {isPaying ? <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Paying...</> : <><DollarSign className="h-3 w-3 mr-1" />Pay</>}
+                      </Button>
+                    </div>
                   </div>
-                  <Badge variant="destructive" className="text-[10px]">PENDING</Badge>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
@@ -158,8 +194,11 @@ export function MemberOverview() {
                 <p className="text-xs text-muted-foreground">Your {stats.currentYear} membership renewal is pending</p>
               </div>
             </div>
-            <Button size="sm" variant="outline" className="text-amber-700 border-amber-300">
-              Go to Renewals
+            <Button size="sm" variant="outline" className="text-amber-700 border-amber-300" onClick={() => {
+              // Dispatch a custom event to switch to payments view
+              window.dispatchEvent(new CustomEvent('navigate', { detail: 'member-payments' }));
+            }}>
+              <CreditCard className="h-3.5 w-3.5 mr-1" />Go to Renewals
             </Button>
           </CardContent>
         </Card>

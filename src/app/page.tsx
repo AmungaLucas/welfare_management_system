@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { LoginForm } from '@/components/shared/login-form';
 import { RegisterForm } from '@/components/shared/register-form';
@@ -31,6 +31,18 @@ const MEMBER_DEFAULT: View = 'member-overview';
 export default function Home() {
   const { session, status } = useAuth();
   const [userView, setUserView] = useState<View | null>(null);
+
+  // Listen for navigation events from child components
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail) {
+        setUserView(customEvent.detail as View);
+      }
+    };
+    window.addEventListener('navigate', handler);
+    return () => window.removeEventListener('navigate', handler);
+  }, []);
 
   const handleViewChange = useCallback((newView: View) => {
     setUserView(newView);
