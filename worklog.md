@@ -61,3 +61,27 @@ Stage Summary:
 - 3 tasks confirmed/implemented: double-click prevention (already done), date fields (added), dashboard restructure (already done)
 - Dates now displayed on both admin and member case views
 - Files changed: `src/components/admin/bereavement-cases.tsx`, `src/components/member/member-cases.tsx`
+
+---
+Task ID: 4
+Agent: Main Agent
+Task: Admin can delete bereavement cases
+
+Work Log:
+- Added DELETE method to `/api/bereavement/[id]/route.ts` — admin-only endpoint
+- Uses Prisma transaction to safely delete all related records: notifications, benefit disbursement, case contributions, burial attendees, then the case itself
+- Added `Trash2` icon import and `AlertDialog` component import to `bereavement-cases.tsx`
+- Added delete state: `deletingCase`, `showDeleteDialog`, `caseToDelete`
+- Added `handleDeleteCase` async function with double-click prevention and proper error handling
+- Added `confirmDelete` function that opens the confirmation dialog
+- Added red trash icon button on each case card (next to Details button)
+- Added "Delete Case" button (destructive variant) inside the case detail dialog
+- Added AlertDialog confirmation dialog showing the deceased name, warning about permanent deletion of all associated data
+- Delete button shows spinner while deleting, disables Cancel during deletion
+- All lint checks pass cleanly
+
+Stage Summary:
+- Admin can now delete bereavement cases from both the card list and detail dialog
+- Deletion is protected by confirmation dialog with clear warning
+- All related data (contributions, attendees, disbursements, notifications) is cleaned up in a transaction
+- Files changed: `src/app/api/bereavement/[id]/route.ts`, `src/components/admin/bereavement-cases.tsx`

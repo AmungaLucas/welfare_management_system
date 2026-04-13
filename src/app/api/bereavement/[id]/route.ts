@@ -84,3 +84,49 @@ export async function PUT(
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await getSession(req);
+    if (!session || !isAdmin(session)) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    const { id } = await params;
+
+    const existing = await prisma.bereavementCase.findUnique({
+      where: { id },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: 'Case not found' }, { status: 404 });
+    }
+
+    // Delete all related records in a transaction
+    await prisma.$transaction(async (tx) => {
+      // Delete notifications for this case
+      await tx.notification.deleteMany({ where: { bereavementCaseId: id } });
+
+      // Delete benefit disbursement if exists
+      await tx.benefitDisbursement.deleteMany({ where: { caseId: id } });
+
+      // Delete case contributions
+      await tx.caseContribution.deleteMany({ where: { caseId: id } });
+
+      // Delete burial attendees
+      await tx.burialAttendee.deleteMany({ where: { caseId: id } });
+
+      // Finally delete the case itself
+      await tx.bereavementCase.delete({ where: { id } });
+    });
+
+    return NextResponse.json({ message: 'Case deleted successfully' });
+  } catch (error) {
+    console.error('Delete bereavement case error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}

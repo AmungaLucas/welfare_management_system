@@ -10,6 +10,9 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import {
@@ -17,7 +20,7 @@ import {
 } from '@/components/ui/table';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import { Heart, Plus, Eye, CheckCircle, XCircle, Users, DollarSign, Search, Loader2, Calendar } from 'lucide-react';
+import { Heart, Plus, Eye, CheckCircle, XCircle, Users, DollarSign, Search, Loader2, Calendar, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface CaseDetail {
@@ -65,6 +68,9 @@ export function BereavementCases() {
   const [submitting, setSubmitting] = useState(false);
   const [closingCase, setClosingCase] = useState<string | null>(null);
   const [disbursingCase, setDisbursingCase] = useState<string | null>(null);
+  const [deletingCase, setDeletingCase] = useState<string | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [caseToDelete, setCaseToDelete] = useState<BereavementCase | null>(null);
   const [form, setForm] = useState({
     memberId: '',
     memberLabel: '',
@@ -206,6 +212,33 @@ export function BereavementCases() {
       else { const d = await res.json(); toast.error(d.error); }
     } catch { toast.error('Failed'); }
     finally { setDisbursingCase(null); }
+  };
+
+  const handleDeleteCase = async () => {
+    if (!caseToDelete || deletingCase) return;
+    setDeletingCase(caseToDelete.id);
+    try {
+      const res = await fetch(`/api/bereavement/${caseToDelete.id}`, { method: 'DELETE' });
+      if (res.ok) {
+        toast.success('Case deleted successfully');
+        setShowDeleteDialog(false);
+        setCaseToDelete(null);
+        if (selectedCase?.id === caseToDelete.id) setSelectedCase(null);
+        fetchCases();
+      } else {
+        const d = await res.json();
+        toast.error(d.error || 'Failed to delete case');
+      }
+    } catch {
+      toast.error('Failed to delete case');
+    } finally {
+      setDeletingCase(null);
+    }
+  };
+
+  const confirmDelete = (c: BereavementCase) => {
+    setCaseToDelete(c);
+    setShowDeleteDialog(true);
   };
 
   return (
@@ -388,10 +421,16 @@ export function BereavementCases() {
                     <p className="text-muted-foreground">Collected: <span className="font-medium text-navy-900">Ksh {Number(c.totalCollected).toLocaleString()}</span></p>
                     <p className="text-muted-foreground">Benefit: <span className="font-medium">Ksh {Number(c.benefitAmount).toLocaleString()}</span></p>
                   </div>
-                  <Button size="sm" variant="outline" className="h-7 text-xs"
-                    onClick={() => { fetchCaseDetail(c.id); }}>
-                    <Eye className="h-3 w-3 mr-1" />Details
-                  </Button>
+                  <div className="flex items-center gap-1">
+                    <Button size="sm" variant="outline" className="h-7 text-xs"
+                      onClick={() => { fetchCaseDetail(c.id); }}>
+                      <Eye className="h-3 w-3 mr-1" />Details
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => confirmDelete(c)}>
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -444,11 +483,37 @@ export function BereavementCases() {
                     {disbursingCase === selectedCase.id ? 'Disbursing...' : <><DollarSign className="h-4 w-4 mr-1" />Disburse Benefit</>}
                   </Button>
                 )}
+                <Button size="sm" variant="destructive" onClick={() => { confirmDelete(selectedCase); setSelectedCase(null); }}>
+                  <Trash2 className="h-3.5 w-3.5 mr-1" />Delete Case
+                </Button>
               </div>
             </div>
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={(open) => { if (!open) { setCaseToDelete(null); setDeletingCase(null); } setShowDeleteDialog(open); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Bereavement Case</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the case for <strong>{caseToDelete?.deceasedName}</strong>?<br /><br />
+              This will permanently remove the case, all member contributions, burial attendees, benefit disbursement records, and notifications associated with this case. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={!!deletingCase}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDeleteCase(); }}
+              disabled={!!deletingCase}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              {deletingCase ? <><Loader2 className="h-4 w-4 mr-1 animate-spin" />Deleting...</> : <><Trash2 className="h-4 w-4 mr-1" />Delete Case</>}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
